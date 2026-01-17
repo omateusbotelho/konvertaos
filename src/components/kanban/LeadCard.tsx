@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { cn } from "@/lib/utils";
@@ -60,7 +61,31 @@ interface LeadCardProps {
   onAgendarFollowUp?: () => void;
 }
 
-export function LeadCard({
+const getAtividadeIcon = (tipo: string) => {
+  switch (tipo) {
+    case "ligacao":
+      return <PhoneCall className="w-3 h-3" />;
+    case "whatsapp":
+      return <MessageCircle className="w-3 h-3" />;
+    case "email":
+      return <Mail className="w-3 h-3" />;
+    default:
+      return <MessageCircle className="w-3 h-3" />;
+  }
+};
+
+const getAtividadeLabel = (tipo: string) => {
+  const labels: Record<string, string> = {
+    ligacao: "Ligação",
+    whatsapp: "WhatsApp",
+    email: "E-mail",
+    reuniao: "Reunião",
+    anotacao: "Anotação",
+  };
+  return labels[tipo] || tipo;
+};
+
+function LeadCardComponent({
   id,
   nome,
   empresa,
@@ -100,30 +125,6 @@ export function LeadCard({
   const diasNaEtapa = etapaDesde ? differenceInDays(new Date(), etapaDesde) : 0;
 
   const origemColorClass = origem ? ORIGEM_COLORS[origem] || ORIGEM_COLORS["Outro"] : "";
-
-  const getAtividadeIcon = (tipo: string) => {
-    switch (tipo) {
-      case "ligacao":
-        return <PhoneCall className="w-3 h-3" />;
-      case "whatsapp":
-        return <MessageCircle className="w-3 h-3" />;
-      case "email":
-        return <Mail className="w-3 h-3" />;
-      default:
-        return <MessageCircle className="w-3 h-3" />;
-    }
-  };
-
-  const getAtividadeLabel = (tipo: string) => {
-    const labels: Record<string, string> = {
-      ligacao: "Ligação",
-      whatsapp: "WhatsApp",
-      email: "E-mail",
-      reuniao: "Reunião",
-      anotacao: "Anotação",
-    };
-    return labels[tipo] || tipo;
-  };
 
   return (
     <div
@@ -248,3 +249,18 @@ export function LeadCard({
     </div>
   );
 }
+
+// Memoize with custom comparison - only re-render when lead data changes
+export const LeadCard = memo(LeadCardComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.id === nextProps.id &&
+    prevProps.nome === nextProps.nome &&
+    prevProps.empresa === nextProps.empresa &&
+    prevProps.telefone === nextProps.telefone &&
+    prevProps.origem === nextProps.origem &&
+    prevProps.servicoInteresse === nextProps.servicoInteresse &&
+    prevProps.followUp?.data?.getTime() === nextProps.followUp?.data?.getTime() &&
+    prevProps.ultimaAtividade?.data?.getTime() === nextProps.ultimaAtividade?.data?.getTime() &&
+    prevProps.etapaDesde?.getTime() === nextProps.etapaDesde?.getTime()
+  );
+});

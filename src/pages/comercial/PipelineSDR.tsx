@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/popover";
 import { KanbanColumn } from "@/components/kanban/KanbanColumn";
 import { LeadCard } from "@/components/kanban/LeadCard";
+import { LeadCardOverlay } from "@/components/kanban/LeadCardOverlay";
 import {
   NovoLeadModal,
   ModalPerda,
@@ -44,6 +45,8 @@ import {
   type EtapaSDR,
   type LeadSDR,
 } from "@/hooks/useLeadsSDR";
+import { useDragState } from "@/hooks/useDragState";
+import { useModalState } from "@/hooks/useModalState";
 import { Plus, Search, X, CalendarIcon, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -74,27 +77,23 @@ export default function PipelineSDR() {
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [comFollowUpPendente, setComFollowUpPendente] = useState(false);
 
-  // Modal states
+  // Novo Lead Modal - isolated state
   const [novoLeadOpen, setNovoLeadOpen] = useState(false);
-  const [perdaModal, setPerdaModal] = useState<{
-    open: boolean;
-    leadId: string;
-    leadNome: string;
-  }>({ open: false, leadId: "", leadNome: "" });
-  const [agendamentoModal, setAgendamentoModal] = useState<{
-    open: boolean;
-    leadId: string;
-    leadNome: string;
-  }>({ open: false, leadId: "", leadNome: "" });
+  
+  // Lead Drawer - isolated state
   const [drawerLead, setDrawerLead] = useState<LeadSDR | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  // Drag state
-  const [activeId, setActiveId] = useState<string | null>(null);
-  const [pendingDrop, setPendingDrop] = useState<{
-    leadId: string;
-    etapa: EtapaSDR;
-  } | null>(null);
+  // Isolated drag and modal states (reduces re-renders)
+  const { activeId, pendingDrop, startDrag, endDrag, setPending, clearPending } = useDragState();
+  const { 
+    perdaModal, 
+    agendamentoModal, 
+    openPerdaModal, 
+    closePerdaModal, 
+    openAgendamentoModal, 
+    closeAgendamentoModal 
+  } = useModalState();
 
   const filters = useMemo(
     () => ({
@@ -200,13 +199,13 @@ export default function PipelineSDR() {
     [leads, activeId]
   );
 
-  const handleDragStart = (event: DragStartEvent) => {
-    setActiveId(event.active.id as string);
-  };
+  const handleDragStart = useCallback((event: DragStartEvent) => {
+    startDrag(event.active.id as string);
+  }, [startDrag]);
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
     const { active, over } = event;
-    setActiveId(null);
+    endDrag();
 
     if (!over) return;
 
@@ -218,15 +217,15 @@ export default function PipelineSDR() {
 
     // Special handling for "perdido"
     if (targetEtapa === "perdido") {
-      setPendingDrop({ leadId, etapa: targetEtapa });
-      setPerdaModal({ open: true, leadId, leadNome: lead.nome });
+      setPending(leadId, targetEtapa);
+      openPerdaModal(leadId, lead.nome);
       return;
     }
 
     // Special handling for "reuniao_agendada"
     if (targetEtapa === "reuniao_agendada") {
-      setPendingDrop({ leadId, etapa: targetEtapa });
-      setAgendamentoModal({ open: true, leadId, leadNome: lead.nome });
+      setPending(leadId, targetEtapa);
+      openAgendamentoModal(leadId, lead.nome);
       return;
     }
 
@@ -242,9 +241,9 @@ export default function PipelineSDR() {
         },
       }
     );
-  };
+  }, [leads, endDrag, setPending, openPerdaModal, openAgendamentoModal, updateEtapa]);
 
-  const handleConfirmPerda = async (data: {
+  const handleConfirmPerda = useCallback(async (data: {
     motivo_perda_id: string;
     observacoes?: string;
   }) => {
@@ -267,15 +266,15 @@ export default function PipelineSDR() {
 
     toast.success("Lead marcado como perdido");
     queryClient.invalidateQueries({ queryKey: ["leads-sdr"] });
-    setPerdaModal({ open: false, leadId: "", leadNome: "" });
-    setPendingDrop(null);
-  };
+    closePerdaModal();
+    clearPending();
+  }, [pendingDrop, queryClient, closePerdaModal, clearPending]);
 
-  const handleCancelPerda = () => {
-    setPendingDrop(null);
-  };
+  const handleCancelPerda = useCallback(() => {
+    clearPending();
+  }, [clearPending]);
 
-  const handleConfirmAgendamento = async (data: {
+  const handleConfirmAgendamento = useCallback(async (data: {
     data: Date;
     horario: string;
     closer_id: string;
@@ -311,13 +310,13 @@ export default function PipelineSDR() {
 
     toast.success("Reunião agendada com sucesso");
     queryClient.invalidateQueries({ queryKey: ["leads-sdr"] });
-    setAgendamentoModal({ open: false, leadId: "", leadNome: "" });
-    setPendingDrop(null);
-  };
+    closeAgendamentoModal();
+    clearPending();
+  }, [pendingDrop, profile?.id, queryClient, closeAgendamentoModal, clearPending]);
 
-  const handleCancelAgendamento = () => {
-    setPendingDrop(null);
-  };
+  const handleCancelAgendamento = useCallback(() => {
+    clearPending();
+  }, [clearPending]);
 
   const handleNovoLead = async (data: any) => {
     let sdrId = data.sdr_responsavel_id;
@@ -541,25 +540,14 @@ export default function PipelineSDR() {
               </div>
             </div>
 
-            {/* Drag Overlay */}
+            {/* Lightweight Drag Overlay - no hooks, no dropdown */}
             <DragOverlay>
               {activeLead && (
-                <div className="opacity-90 rotate-3 scale-105">
-                  <LeadCard
-                    id={activeLead.id}
-                    nome={activeLead.nome}
-                    empresa={activeLead.empresa || undefined}
-                    telefone={activeLead.telefone}
-                    origem={activeLead.origem_nome}
-                    servicoInteresse={activeLead.servico_nome}
-                    followUp={activeLead.follow_up}
-                    ultimaAtividade={
-                      activeLead.ultima_atividade
-                        ? { tipo: "ligacao", data: activeLead.ultima_atividade }
-                        : undefined
-                    }
-                  />
-                </div>
+                <LeadCardOverlay
+                  nome={activeLead.nome}
+                  empresa={activeLead.empresa || undefined}
+                  origem={activeLead.origem_nome}
+                />
               )}
             </DragOverlay>
           </DndContext>
@@ -577,9 +565,7 @@ export default function PipelineSDR() {
 
         <ModalPerda
           open={perdaModal.open}
-          onOpenChange={(open) =>
-            setPerdaModal((prev) => ({ ...prev, open }))
-          }
+          onOpenChange={(open) => !open && closePerdaModal()}
           onConfirm={handleConfirmPerda}
           onCancel={handleCancelPerda}
           leadNome={perdaModal.leadNome}
@@ -588,9 +574,7 @@ export default function PipelineSDR() {
 
         <ModalAgendamento
           open={agendamentoModal.open}
-          onOpenChange={(open) =>
-            setAgendamentoModal((prev) => ({ ...prev, open }))
-          }
+          onOpenChange={(open) => !open && closeAgendamentoModal()}
           onConfirm={handleConfirmAgendamento}
           onCancel={handleCancelAgendamento}
           leadNome={agendamentoModal.leadNome}
