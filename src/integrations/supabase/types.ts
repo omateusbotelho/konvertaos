@@ -911,6 +911,45 @@ export type Database = {
           },
         ]
       }
+      error_logs: {
+        Row: {
+          componente: string | null
+          created_at: string
+          dados_extras: Json | null
+          id: string
+          mensagem: string
+          stack_trace: string | null
+          tipo: string
+          url: string | null
+          user_agent: string | null
+          usuario_id: string | null
+        }
+        Insert: {
+          componente?: string | null
+          created_at?: string
+          dados_extras?: Json | null
+          id?: string
+          mensagem: string
+          stack_trace?: string | null
+          tipo?: string
+          url?: string | null
+          user_agent?: string | null
+          usuario_id?: string | null
+        }
+        Update: {
+          componente?: string | null
+          created_at?: string
+          dados_extras?: Json | null
+          id?: string
+          mensagem?: string
+          stack_trace?: string | null
+          tipo?: string
+          url?: string | null
+          user_agent?: string | null
+          usuario_id?: string | null
+        }
+        Relationships: []
+      }
       etapas_kanban: {
         Row: {
           cor: string | null
@@ -2278,6 +2317,7 @@ export type Database = {
         }[]
       }
       calculate_nps_stats: { Args: never; Returns: Json }
+      cleanup_old_error_logs: { Args: never; Returns: undefined }
       criar_notificacao: {
         Args: {
           p_dados?: Json
