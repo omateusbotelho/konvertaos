@@ -14,133 +14,33 @@ serve(async (req) => {
 
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    // Usar anon key em vez da service role key
+    // A lógica de notificação é executada via RPC com SECURITY DEFINER
+    const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-    const now = new Date();
-    const em24Horas = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-    const em1Hora = new Date(now.getTime() + 60 * 60 * 1000);
-    
-    const resultados = {
-      tarefasVencendo: 0,
-      reunioesProximas: 0,
-    };
+    console.log("Iniciando processamento de notificações agendadas...");
 
-    // 1. Tarefas vencendo em 24 horas
-    console.log("Verificando tarefas vencendo em 24h...");
-    
-    const { data: tarefasVencendo, error: tarefasError } = await supabase
-      .from("tarefas")
-      .select("id, titulo, responsavel_id, data_vencimento")
-      .eq("concluida", false)
-      .gte("data_vencimento", now.toISOString())
-      .lte("data_vencimento", em24Horas.toISOString())
-      .not("responsavel_id", "is", null);
+    // Chamar a função RPC que executa com SECURITY DEFINER
+    // Isso garante que a lógica seja executada com segurança no servidor
+    const { data, error } = await supabase.rpc("process_scheduled_notifications");
 
-    if (tarefasError) {
-      console.error("Erro ao buscar tarefas:", tarefasError);
-    } else if (tarefasVencendo && tarefasVencendo.length > 0) {
-      console.log(`Encontradas ${tarefasVencendo.length} tarefas vencendo`);
-      
-      for (const tarefa of tarefasVencendo) {
-        // Verificar se já enviou notificação de prazo para esta tarefa hoje
-        const { data: notificacaoExistente } = await supabase
-          .from("notificacoes")
-          .select("id")
-          .eq("usuario_id", tarefa.responsavel_id)
-          .eq("tipo", "tarefa_prazo")
-          .contains("dados", { tarefa_id: tarefa.id })
-          .gte("created_at", new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString())
-          .single();
-
-        if (!notificacaoExistente) {
-          const horasRestantes = Math.round(
-            (new Date(tarefa.data_vencimento!).getTime() - now.getTime()) / (60 * 60 * 1000)
-          );
-
-          const { error: insertError } = await supabase.from("notificacoes").insert({
-            usuario_id: tarefa.responsavel_id,
-            tipo: "tarefa_prazo",
-            titulo: "Tarefa vencendo em breve",
-            mensagem: `"${tarefa.titulo}" vence em ${horasRestantes}h`,
-            link: `/tarefas?id=${tarefa.id}`,
-            dados: { tarefa_id: tarefa.id },
-          });
-
-          if (insertError) {
-            console.error("Erro ao criar notificação de tarefa:", insertError);
-          } else {
-            resultados.tarefasVencendo++;
-          }
-        }
-      }
+    if (error) {
+      console.error("Erro ao processar notificações:", error);
+      throw error;
     }
 
-    // 2. Reuniões em 1 hora
-    console.log("Verificando reuniões em 1 hora...");
-    
-    const { data: reunioesProximas, error: reunioesError } = await supabase
-      .from("reunioes")
-      .select(`
-        id, 
-        titulo, 
-        data_inicio,
-        reuniao_participantes (participante_id)
-      `)
-      .eq("status", "agendada")
-      .gte("data_inicio", now.toISOString())
-      .lte("data_inicio", em1Hora.toISOString());
-
-    if (reunioesError) {
-      console.error("Erro ao buscar reuniões:", reunioesError);
-    } else if (reunioesProximas && reunioesProximas.length > 0) {
-      console.log(`Encontradas ${reunioesProximas.length} reuniões próximas`);
-      
-      for (const reuniao of reunioesProximas) {
-        const participantes = reuniao.reuniao_participantes || [];
-        
-        for (const participante of participantes) {
-          // Verificar se já enviou lembrete para esta reunião
-          const { data: lembreteExistente } = await supabase
-            .from("notificacoes")
-            .select("id")
-            .eq("usuario_id", participante.participante_id)
-            .eq("tipo", "reuniao_lembrete")
-            .contains("dados", { reuniao_id: reuniao.id })
-            .single();
-
-          if (!lembreteExistente) {
-            const minutosRestantes = Math.round(
-              (new Date(reuniao.data_inicio).getTime() - now.getTime()) / (60 * 1000)
-            );
-
-            const { error: insertError } = await supabase.from("notificacoes").insert({
-              usuario_id: participante.participante_id,
-              tipo: "reuniao_lembrete",
-              titulo: "Reunião em breve",
-              mensagem: `"${reuniao.titulo}" começa em ${minutosRestantes} minutos`,
-              link: `/calendario?reuniao=${reuniao.id}`,
-              dados: { reuniao_id: reuniao.id },
-            });
-
-            if (insertError) {
-              console.error("Erro ao criar notificação de reunião:", insertError);
-            } else {
-              resultados.reunioesProximas++;
-            }
-          }
-        }
-      }
-    }
-
-    console.log("Resultados:", resultados);
+    console.log("Resultados:", data);
 
     return new Response(
       JSON.stringify({
         success: true,
         message: "Notificações processadas com sucesso",
-        resultados,
+        resultados: {
+          tarefasVencendo: data?.tarefas_vencendo || 0,
+          reunioesProximas: data?.reunioes_proximas || 0,
+        },
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
