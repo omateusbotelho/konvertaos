@@ -75,7 +75,7 @@ export default function ProjetoDetalhes() {
   const { data: projeto, isLoading } = useProjeto(id || "");
   const { data: etapas } = useEtapasKanban();
   const { data: tarefas } = useTarefas({ projetoId: id });
-  const moverTarefa = useMoverTarefa();
+  const moverTarefa = useMoveTarefa();
   const updateProjeto = useUpdateProjeto();
 
   const sensors = useSensors(
@@ -100,7 +100,8 @@ export default function ProjetoDetalhes() {
       const etapaDestino = etapas?.find((e) => e.id === novaEtapaId);
       moverTarefa.mutate({
         tarefaId,
-        novaEtapaId,
+        etapaId: novaEtapaId,
+        ordem: 0,
         concluir: etapaDestino?.is_done || false,
       });
     }
@@ -266,7 +267,7 @@ export default function ProjetoDetalhes() {
                       key={etapa.id}
                       etapa={etapa}
                       tarefas={etapaTarefas}
-                      onTarefaClick={setSelectedTarefaId}
+                      onTarefaClick={(tarefa) => setSelectedTarefaId(tarefa.id)}
                     />
                   );
                 })}
@@ -453,6 +454,10 @@ export default function ProjetoDetalhes() {
         tarefaId={selectedTarefaId}
         open={!!selectedTarefaId}
         onOpenChange={(open) => !open && setSelectedTarefaId(null)}
+        onEdit={() => {
+          setSelectedTarefaId(null);
+          setIsNovaTarefaOpen(true);
+        }}
       />
 
       {/* Modal nova tarefa */}

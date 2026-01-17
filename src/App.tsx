@@ -22,6 +22,9 @@ const LeadsFrios = lazy(() => import("./pages/comercial/LeadsFrios"));
 const Clientes = lazy(() => import("./pages/clientes/Clientes"));
 const ClienteDetalhes = lazy(() => import("./pages/clientes/ClienteDetalhes"));
 const Tarefas = lazy(() => import("./pages/Tarefas"));
+const Projetos = lazy(() => import("./pages/Projetos"));
+const ProjetoDetalhes = lazy(() => import("./pages/ProjetoDetalhes"));
+const OnboardingConfig = lazy(() => import("./pages/OnboardingConfig"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -127,6 +130,30 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <Tarefas />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/projetos"
+                element={
+                  <ProtectedRoute>
+                    <Projetos />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/projetos/:id"
+                element={
+                  <ProtectedRoute>
+                    <ProjetoDetalhes />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/configuracoes/onboarding"
+                element={
+                  <ProtectedRoute requireAdmin>
+                    <OnboardingConfig />
                   </ProtectedRoute>
                 }
               />
