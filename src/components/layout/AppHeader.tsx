@@ -1,8 +1,9 @@
 import { useSidebar } from "@/hooks/use-sidebar";
 import { cn } from "@/lib/utils";
-import { Search, Bell, Menu } from "lucide-react";
+import { Search, Menu } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { NotificationBell } from "./NotificationBell";
 
 export function AppHeader() {
   const { isCollapsed, toggleMobile } = useSidebar();
@@ -43,10 +44,7 @@ export function AppHeader() {
           </Button>
 
           {/* Notifications */}
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell className="h-5 w-5" />
-            <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-destructive" />
-          </Button>
+          <NotificationBell />
         </div>
       </div>
     </header>

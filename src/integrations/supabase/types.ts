@@ -1105,6 +1105,53 @@ export type Database = {
         }
         Relationships: []
       }
+      notificacoes: {
+        Row: {
+          created_at: string | null
+          dados: Json | null
+          id: string
+          lida: boolean | null
+          lida_em: string | null
+          link: string | null
+          mensagem: string
+          tipo: Database["public"]["Enums"]["tipo_notificacao"]
+          titulo: string
+          usuario_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          dados?: Json | null
+          id?: string
+          lida?: boolean | null
+          lida_em?: string | null
+          link?: string | null
+          mensagem: string
+          tipo: Database["public"]["Enums"]["tipo_notificacao"]
+          titulo: string
+          usuario_id: string
+        }
+        Update: {
+          created_at?: string | null
+          dados?: Json | null
+          id?: string
+          lida?: boolean | null
+          lida_em?: string | null
+          link?: string | null
+          mensagem?: string
+          tipo?: Database["public"]["Enums"]["tipo_notificacao"]
+          titulo?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notificacoes_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       nps_config: {
         Row: {
           ativo: boolean | null
@@ -2060,6 +2107,17 @@ export type Database = {
       }
     }
     Functions: {
+      criar_notificacao: {
+        Args: {
+          p_dados?: Json
+          p_link?: string
+          p_mensagem: string
+          p_tipo: Database["public"]["Enums"]["tipo_notificacao"]
+          p_titulo: string
+          p_usuario_id: string
+        }
+        Returns: string
+      }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
@@ -2136,6 +2194,23 @@ export type Database = {
         | "reaberta"
         | "editada"
       tipo_lancamento: "receita" | "despesa"
+      tipo_notificacao:
+        | "tarefa_atribuida"
+        | "tarefa_prazo"
+        | "tarefa_comentario"
+        | "tarefa_mencao"
+        | "lead_recebido"
+        | "reuniao_agendada"
+        | "reuniao_lembrete"
+        | "cliente_ativado"
+        | "pagamento_confirmado"
+        | "pagamento_atrasado"
+        | "sla_alerta"
+        | "ausencia_solicitada"
+        | "ausencia_aprovada"
+        | "nps_detrator"
+        | "contrato_vencendo"
+        | "geral"
       tipo_reuniao: "weekly" | "1:1" | "projeto" | "cliente" | "outro"
       tipo_timeline:
         | "criado"
@@ -2345,6 +2420,24 @@ export const Constants = {
         "editada",
       ],
       tipo_lancamento: ["receita", "despesa"],
+      tipo_notificacao: [
+        "tarefa_atribuida",
+        "tarefa_prazo",
+        "tarefa_comentario",
+        "tarefa_mencao",
+        "lead_recebido",
+        "reuniao_agendada",
+        "reuniao_lembrete",
+        "cliente_ativado",
+        "pagamento_confirmado",
+        "pagamento_atrasado",
+        "sla_alerta",
+        "ausencia_solicitada",
+        "ausencia_aprovada",
+        "nps_detrator",
+        "contrato_vencendo",
+        "geral",
+      ],
       tipo_reuniao: ["weekly", "1:1", "projeto", "cliente", "outro"],
       tipo_timeline: [
         "criado",
