@@ -2265,6 +2265,15 @@ export type Database = {
         }
         Returns: string
       }
+      get_leads_followups_and_activities: {
+        Args: { p_lead_ids: string[] }
+        Returns: {
+          lead_id: string
+          proximo_followup_data: string
+          proximo_followup_descricao: string
+          ultima_atividade_data: string
+        }[]
+      }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
