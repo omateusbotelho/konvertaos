@@ -2274,6 +2274,10 @@ export type Database = {
           ultima_atividade_data: string
         }[]
       }
+      get_user_cargo: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Enums"]["cargo_tipo"]
+      }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
