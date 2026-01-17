@@ -9,3 +9,7 @@ export { ModalPerdaCloser } from "./ModalPerdaCloser";
 export { ModalFechadoGanho } from "./ModalFechadoGanho";
 export { AgendaRapida } from "./AgendaRapida";
 export { LeadDrawerCloser } from "./LeadDrawerCloser";
+export { LeadCardFrio } from "./LeadCardFrio";
+export { ModalReativar } from "./ModalReativar";
+export { ModalDescartar } from "./ModalDescartar";
+export { ModalAtivacaoCliente } from "./ModalAtivacaoCliente";
