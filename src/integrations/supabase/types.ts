@@ -101,6 +101,13 @@ export type Database = {
             referencedRelation: "clientes"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "cliente_acessos_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "margem_por_cliente"
+            referencedColumns: ["cliente_id"]
+          },
         ]
       }
       cliente_arquivos: {
@@ -138,6 +145,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "clientes"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cliente_arquivos_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "margem_por_cliente"
+            referencedColumns: ["cliente_id"]
           },
           {
             foreignKeyName: "cliente_arquivos_uploaded_por_id_fkey"
@@ -191,6 +205,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "cliente_servicos_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "margem_por_cliente"
+            referencedColumns: ["cliente_id"]
+          },
+          {
             foreignKeyName: "cliente_servicos_responsavel_id_fkey"
             columns: ["responsavel_id"]
             isOneToOne: false
@@ -241,6 +262,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "clientes"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cliente_timeline_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "margem_por_cliente"
+            referencedColumns: ["cliente_id"]
           },
           {
             foreignKeyName: "cliente_timeline_realizado_por_id_fkey"
@@ -368,6 +396,210 @@ export type Database = {
           },
         ]
       }
+      cobrancas: {
+        Row: {
+          asaas_payment_id: string | null
+          cliente_id: string
+          created_at: string | null
+          data_pagamento: string | null
+          data_vencimento: string
+          forma_pagamento: Database["public"]["Enums"]["forma_pagamento"] | null
+          id: string
+          linha_digitavel: string | null
+          observacoes: string | null
+          pix_copia_cola: string | null
+          status: Database["public"]["Enums"]["status_cobranca"] | null
+          tentativas: number | null
+          tipo: Database["public"]["Enums"]["tipo_cobranca"] | null
+          updated_at: string | null
+          url_boleto: string | null
+          url_pix: string | null
+          valor: number
+        }
+        Insert: {
+          asaas_payment_id?: string | null
+          cliente_id: string
+          created_at?: string | null
+          data_pagamento?: string | null
+          data_vencimento: string
+          forma_pagamento?:
+            | Database["public"]["Enums"]["forma_pagamento"]
+            | null
+          id?: string
+          linha_digitavel?: string | null
+          observacoes?: string | null
+          pix_copia_cola?: string | null
+          status?: Database["public"]["Enums"]["status_cobranca"] | null
+          tentativas?: number | null
+          tipo?: Database["public"]["Enums"]["tipo_cobranca"] | null
+          updated_at?: string | null
+          url_boleto?: string | null
+          url_pix?: string | null
+          valor: number
+        }
+        Update: {
+          asaas_payment_id?: string | null
+          cliente_id?: string
+          created_at?: string | null
+          data_pagamento?: string | null
+          data_vencimento?: string
+          forma_pagamento?:
+            | Database["public"]["Enums"]["forma_pagamento"]
+            | null
+          id?: string
+          linha_digitavel?: string | null
+          observacoes?: string | null
+          pix_copia_cola?: string | null
+          status?: Database["public"]["Enums"]["status_cobranca"] | null
+          tentativas?: number | null
+          tipo?: Database["public"]["Enums"]["tipo_cobranca"] | null
+          updated_at?: string | null
+          url_boleto?: string | null
+          url_pix?: string | null
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cobrancas_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cobrancas_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "margem_por_cliente"
+            referencedColumns: ["cliente_id"]
+          },
+        ]
+      }
+      comissao_config: {
+        Row: {
+          ativo: boolean | null
+          colaborador_id: string
+          created_at: string | null
+          id: string
+          tipo: string | null
+          updated_at: string | null
+          valor: number
+        }
+        Insert: {
+          ativo?: boolean | null
+          colaborador_id: string
+          created_at?: string | null
+          id?: string
+          tipo?: string | null
+          updated_at?: string | null
+          valor: number
+        }
+        Update: {
+          ativo?: boolean | null
+          colaborador_id?: string
+          created_at?: string | null
+          id?: string
+          tipo?: string | null
+          updated_at?: string | null
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comissao_config_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      comissoes: {
+        Row: {
+          aprovado_por_id: string | null
+          cliente_id: string
+          cobranca_id: string | null
+          colaborador_id: string
+          created_at: string | null
+          data_pagamento: string | null
+          data_referencia: string
+          id: string
+          observacoes: string | null
+          percentual: number | null
+          status: Database["public"]["Enums"]["status_comissao"] | null
+          tipo_colaborador: Database["public"]["Enums"]["tipo_comissao"]
+          updated_at: string | null
+          valor: number
+        }
+        Insert: {
+          aprovado_por_id?: string | null
+          cliente_id: string
+          cobranca_id?: string | null
+          colaborador_id: string
+          created_at?: string | null
+          data_pagamento?: string | null
+          data_referencia: string
+          id?: string
+          observacoes?: string | null
+          percentual?: number | null
+          status?: Database["public"]["Enums"]["status_comissao"] | null
+          tipo_colaborador: Database["public"]["Enums"]["tipo_comissao"]
+          updated_at?: string | null
+          valor: number
+        }
+        Update: {
+          aprovado_por_id?: string | null
+          cliente_id?: string
+          cobranca_id?: string | null
+          colaborador_id?: string
+          created_at?: string | null
+          data_pagamento?: string | null
+          data_referencia?: string
+          id?: string
+          observacoes?: string | null
+          percentual?: number | null
+          status?: Database["public"]["Enums"]["status_comissao"] | null
+          tipo_colaborador?: Database["public"]["Enums"]["tipo_comissao"]
+          updated_at?: string | null
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comissoes_aprovado_por_id_fkey"
+            columns: ["aprovado_por_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comissoes_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comissoes_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "margem_por_cliente"
+            referencedColumns: ["cliente_id"]
+          },
+          {
+            foreignKeyName: "comissoes_cobranca_id_fkey"
+            columns: ["cobranca_id"]
+            isOneToOne: false
+            referencedRelation: "cobrancas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comissoes_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       convites: {
         Row: {
           cargo: Database["public"]["Enums"]["cargo_tipo"]
@@ -412,6 +644,103 @@ export type Database = {
           {
             foreignKeyName: "convites_convidado_por_fkey"
             columns: ["convidado_por"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      custos_fixos: {
+        Row: {
+          ativo: boolean | null
+          categoria: Database["public"]["Enums"]["categoria_custo"]
+          created_at: string | null
+          dia_vencimento: number | null
+          id: string
+          nome: string
+          observacoes: string | null
+          recorrente: boolean | null
+          updated_at: string | null
+          valor: number
+        }
+        Insert: {
+          ativo?: boolean | null
+          categoria: Database["public"]["Enums"]["categoria_custo"]
+          created_at?: string | null
+          dia_vencimento?: number | null
+          id?: string
+          nome: string
+          observacoes?: string | null
+          recorrente?: boolean | null
+          updated_at?: string | null
+          valor: number
+        }
+        Update: {
+          ativo?: boolean | null
+          categoria?: Database["public"]["Enums"]["categoria_custo"]
+          created_at?: string | null
+          dia_vencimento?: number | null
+          id?: string
+          nome?: string
+          observacoes?: string | null
+          recorrente?: boolean | null
+          updated_at?: string | null
+          valor?: number
+        }
+        Relationships: []
+      }
+      custos_variaveis: {
+        Row: {
+          categoria: Database["public"]["Enums"]["categoria_custo"]
+          cliente_id: string | null
+          created_at: string | null
+          data_referencia: string
+          id: string
+          lancado_por_id: string
+          nome: string
+          observacoes: string | null
+          valor: number
+        }
+        Insert: {
+          categoria: Database["public"]["Enums"]["categoria_custo"]
+          cliente_id?: string | null
+          created_at?: string | null
+          data_referencia: string
+          id?: string
+          lancado_por_id: string
+          nome: string
+          observacoes?: string | null
+          valor: number
+        }
+        Update: {
+          categoria?: Database["public"]["Enums"]["categoria_custo"]
+          cliente_id?: string | null
+          created_at?: string | null
+          data_referencia?: string
+          id?: string
+          lancado_por_id?: string
+          nome?: string
+          observacoes?: string | null
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custos_variaveis_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "custos_variaveis_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "margem_por_cliente"
+            referencedColumns: ["cliente_id"]
+          },
+          {
+            foreignKeyName: "custos_variaveis_lancado_por_id_fkey"
+            columns: ["lancado_por_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -492,6 +821,94 @@ export type Database = {
             columns: ["lead_id"]
             isOneToOne: false
             referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lancamentos: {
+        Row: {
+          categoria: string
+          cliente_id: string | null
+          cobranca_id: string | null
+          created_at: string | null
+          custo_fixo_id: string | null
+          custo_variavel_id: string | null
+          data: string
+          descricao: string
+          id: string
+          lancado_por_id: string
+          tipo: Database["public"]["Enums"]["tipo_lancamento"]
+          valor: number
+        }
+        Insert: {
+          categoria: string
+          cliente_id?: string | null
+          cobranca_id?: string | null
+          created_at?: string | null
+          custo_fixo_id?: string | null
+          custo_variavel_id?: string | null
+          data: string
+          descricao: string
+          id?: string
+          lancado_por_id: string
+          tipo: Database["public"]["Enums"]["tipo_lancamento"]
+          valor: number
+        }
+        Update: {
+          categoria?: string
+          cliente_id?: string | null
+          cobranca_id?: string | null
+          created_at?: string | null
+          custo_fixo_id?: string | null
+          custo_variavel_id?: string | null
+          data?: string
+          descricao?: string
+          id?: string
+          lancado_por_id?: string
+          tipo?: Database["public"]["Enums"]["tipo_lancamento"]
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lancamentos_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lancamentos_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "margem_por_cliente"
+            referencedColumns: ["cliente_id"]
+          },
+          {
+            foreignKeyName: "lancamentos_cobranca_id_fkey"
+            columns: ["cobranca_id"]
+            isOneToOne: false
+            referencedRelation: "cobrancas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lancamentos_custo_fixo_id_fkey"
+            columns: ["custo_fixo_id"]
+            isOneToOne: false
+            referencedRelation: "custos_fixos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lancamentos_custo_variavel_id_fkey"
+            columns: ["custo_variavel_id"]
+            isOneToOne: false
+            referencedRelation: "custos_variaveis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lancamentos_lancado_por_id_fkey"
+            columns: ["lancado_por_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -628,6 +1045,51 @@ export type Database = {
         }
         Relationships: []
       }
+      nps_respostas: {
+        Row: {
+          cliente_id: string
+          comentario: string | null
+          created_at: string | null
+          enviado_em: string | null
+          id: string
+          respondido_em: string | null
+          score: number
+        }
+        Insert: {
+          cliente_id: string
+          comentario?: string | null
+          created_at?: string | null
+          enviado_em?: string | null
+          id?: string
+          respondido_em?: string | null
+          score: number
+        }
+        Update: {
+          cliente_id?: string
+          comentario?: string | null
+          created_at?: string | null
+          enviado_em?: string | null
+          id?: string
+          respondido_em?: string | null
+          score?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nps_respostas_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nps_respostas_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "margem_por_cliente"
+            referencedColumns: ["cliente_id"]
+          },
+        ]
+      }
       origens_lead: {
         Row: {
           ativo: boolean | null
@@ -732,6 +1194,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "clientes"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projetos_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "margem_por_cliente"
+            referencedColumns: ["cliente_id"]
           },
           {
             foreignKeyName: "projetos_cliente_servico_id_fkey"
@@ -1061,6 +1530,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "tarefas_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "margem_por_cliente"
+            referencedColumns: ["cliente_id"]
+          },
+          {
             foreignKeyName: "tarefas_concluida_por_id_fkey"
             columns: ["concluida_por_id"]
             isOneToOne: false
@@ -1200,7 +1676,33 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      margem_por_cliente: {
+        Row: {
+          cliente_id: string | null
+          custos_variaveis: number | null
+          margem: number | null
+          nome_fantasia: string | null
+          razao_social: string | null
+          receita_mensal: number | null
+        }
+        Relationships: []
+      }
+      mrr_atual: {
+        Row: {
+          mrr: number | null
+          total_clientes: number | null
+        }
+        Relationships: []
+      }
+      resumo_financeiro_mensal: {
+        Row: {
+          despesa: number | null
+          lucro: number | null
+          mes: string | null
+          receita: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       get_user_role: {
@@ -1214,6 +1716,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_admin_or_financeiro: { Args: never; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "colaborador"
@@ -1224,6 +1727,13 @@ export type Database = {
         | "gestor_trafego"
         | "social_media"
         | "financeiro"
+      categoria_custo:
+        | "ferramenta"
+        | "pessoal"
+        | "infraestrutura"
+        | "midia"
+        | "freelancer"
+        | "outros"
       etapa_closer:
         | "reuniao_agendada"
         | "reuniao_realizada"
@@ -1252,8 +1762,12 @@ export type Database = {
       prioridade_tarefa: "baixa" | "media" | "alta" | "urgente"
       setor_tipo: "comercial" | "trafego" | "social_media" | "financeiro"
       status_cliente: "ativo" | "inadimplente" | "cancelado"
+      status_cobranca: "pendente" | "pago" | "atrasado" | "cancelado" | "falhou"
+      status_comissao: "pendente" | "aprovada" | "paga" | "cancelada"
       status_projeto: "ativo" | "pausado" | "concluido" | "cancelado"
       tipo_arquivo: "contrato" | "briefing" | "documento" | "outro"
+      tipo_cobranca: "recorrente" | "avulsa"
+      tipo_comissao: "sdr" | "closer"
       tipo_historico_tarefa:
         | "criada"
         | "etapa_alterada"
@@ -1263,6 +1777,7 @@ export type Database = {
         | "concluida"
         | "reaberta"
         | "editada"
+      tipo_lancamento: "receita" | "despesa"
       tipo_timeline:
         | "criado"
         | "servico_adicionado"
@@ -1412,6 +1927,14 @@ export const Constants = {
         "social_media",
         "financeiro",
       ],
+      categoria_custo: [
+        "ferramenta",
+        "pessoal",
+        "infraestrutura",
+        "midia",
+        "freelancer",
+        "outros",
+      ],
       etapa_closer: [
         "reuniao_agendada",
         "reuniao_realizada",
@@ -1443,8 +1966,12 @@ export const Constants = {
       prioridade_tarefa: ["baixa", "media", "alta", "urgente"],
       setor_tipo: ["comercial", "trafego", "social_media", "financeiro"],
       status_cliente: ["ativo", "inadimplente", "cancelado"],
+      status_cobranca: ["pendente", "pago", "atrasado", "cancelado", "falhou"],
+      status_comissao: ["pendente", "aprovada", "paga", "cancelada"],
       status_projeto: ["ativo", "pausado", "concluido", "cancelado"],
       tipo_arquivo: ["contrato", "briefing", "documento", "outro"],
+      tipo_cobranca: ["recorrente", "avulsa"],
+      tipo_comissao: ["sdr", "closer"],
       tipo_historico_tarefa: [
         "criada",
         "etapa_alterada",
@@ -1455,6 +1982,7 @@ export const Constants = {
         "reaberta",
         "editada",
       ],
+      tipo_lancamento: ["receita", "despesa"],
       tipo_timeline: [
         "criado",
         "servico_adicionado",
