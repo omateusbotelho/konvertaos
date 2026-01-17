@@ -3,6 +3,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { addDays } from "date-fns";
+import type { 
+  SupabaseError,
+  StatusProjeto,
+  ProjetosTaskCounts,
+  ProjetosStats as ProjetosStatsRPC,
+  EmbeddedProfile,
+  SetorTipo
+} from "@/types/supabase-helpers";
 
 export interface Projeto {
   id: string;
@@ -11,7 +19,7 @@ export interface Projeto {
   nome: string;
   descricao?: string;
   responsavel_principal_id?: string;
-  status: "ativo" | "pausado" | "concluido" | "cancelado";
+  status: StatusProjeto;
   data_inicio?: string;
   data_conclusao?: string;
   created_at?: string;
@@ -31,14 +39,48 @@ export interface UseProjetosFilters {
   busca?: string;
   clienteId?: string;
   responsavelId?: string;
-  status?: "ativo" | "pausado" | "concluido" | "cancelado";
+  status?: StatusProjeto;
   comAtrasadas?: boolean;
+}
+
+// Embedded types for query results
+interface EmbeddedClienteProjeto {
+  razao_social: string;
+  nome_fantasia: string | null;
+}
+
+interface EmbeddedResponsavel {
+  nome: string;
+}
+
+interface EmbeddedServicoNested {
+  nome: string;
+}
+
+interface EmbeddedClienteServicoProjeto {
+  servico: EmbeddedServicoNested | null;
+}
+
+interface ProjetoQueryResult {
+  id: string;
+  cliente_id: string;
+  cliente_servico_id: string | null;
+  nome: string;
+  descricao: string | null;
+  responsavel_principal_id: string | null;
+  status: StatusProjeto | null;
+  data_inicio: string | null;
+  data_conclusao: string | null;
+  created_at: string | null;
+  cliente: EmbeddedClienteProjeto | null;
+  responsavel: EmbeddedResponsavel | null;
+  servico: EmbeddedClienteServicoProjeto | null;
 }
 
 export function useProjetos(filters: UseProjetosFilters = {}) {
   const { user } = useAuth();
 
-  return useQuery({
+  return useQuery<Projeto[], SupabaseError>({
     queryKey: ["projetos", filters],
     queryFn: async () => {
       let query = supabase
@@ -90,7 +132,7 @@ export function useProjetos(filters: UseProjetosFilters = {}) {
       });
       
       // Populate from RPC result
-      (taskCounts || []).forEach((tc: any) => {
+      ((taskCounts || []) as ProjetosTaskCounts[]).forEach((tc) => {
         if (tc.projeto_id) {
           tarefasByProjeto[tc.projeto_id] = {
             total: Number(tc.total_tarefas) || 0,
@@ -100,11 +142,19 @@ export function useProjetos(filters: UseProjetosFilters = {}) {
         }
       });
 
-      let projetos = data.map((projeto): Projeto => ({
-        ...projeto,
-        status: projeto.status as Projeto["status"],
+      let projetos = (data as ProjetoQueryResult[]).map((projeto): Projeto => ({
+        id: projeto.id,
+        cliente_id: projeto.cliente_id,
+        cliente_servico_id: projeto.cliente_servico_id || undefined,
+        nome: projeto.nome,
+        descricao: projeto.descricao || undefined,
+        responsavel_principal_id: projeto.responsavel_principal_id || undefined,
+        status: projeto.status || "ativo",
+        data_inicio: projeto.data_inicio || undefined,
+        data_conclusao: projeto.data_conclusao || undefined,
+        created_at: projeto.created_at || undefined,
         cliente_nome: projeto.cliente?.razao_social,
-        cliente_nome_fantasia: projeto.cliente?.nome_fantasia,
+        cliente_nome_fantasia: projeto.cliente?.nome_fantasia || undefined,
         responsavel_nome: projeto.responsavel?.nome,
         servico_nome: projeto.servico?.servico?.nome,
         total_tarefas: tarefasByProjeto[projeto.id]?.total || 0,
@@ -122,6 +172,11 @@ export function useProjetos(filters: UseProjetosFilters = {}) {
     enabled: !!user,
     staleTime: 2 * 60 * 1000,
   });
+}
+
+interface EquipeMembro extends EmbeddedProfile {
+  total_tarefas: number;
+  tarefas_concluidas: number;
 }
 
 export function useProjeto(id: string) {
@@ -155,44 +210,65 @@ export function useProjeto(id: string) {
       ).length || 0;
 
       // Get team members
-      const responsavelIds = [...new Set(tarefas?.map((t) => t.responsavel_id).filter(Boolean) || [])];
+      const responsavelIds = [...new Set(tarefas?.map((t) => t.responsavel_id).filter((id): id is string => id !== null) || [])];
       
-      let equipe: any[] = [];
+      let equipe: EquipeMembro[] = [];
       if (responsavelIds.length > 0) {
         const { data: membros } = await supabase
           .from("profiles")
           .select("id, nome, avatar_url, cargo, setor")
           .in("id", responsavelIds);
 
-        equipe = membros?.map((m) => {
+        equipe = (membros || []).map((m) => {
           const tarefasMembro = tarefas?.filter((t) => t.responsavel_id === m.id) || [];
           return {
-            ...m,
+            id: m.id,
+            nome: m.nome,
+            avatar_url: m.avatar_url,
+            cargo: m.cargo,
+            setor: m.setor as SetorTipo | null,
             total_tarefas: tarefasMembro.length,
             tarefas_concluidas: tarefasMembro.filter((t) => t.concluida).length,
           };
-        }) || [];
+        });
       }
 
+      const projeto = data as ProjetoQueryResult;
+
       return {
-        ...data,
-        status: data.status as Projeto["status"],
-        cliente_nome: data.cliente?.razao_social,
-        cliente_nome_fantasia: data.cliente?.nome_fantasia,
-        responsavel_nome: data.responsavel?.nome,
-        servico_nome: data.servico?.servico?.nome,
+        id: projeto.id,
+        cliente_id: projeto.cliente_id,
+        cliente_servico_id: projeto.cliente_servico_id || undefined,
+        nome: projeto.nome,
+        descricao: projeto.descricao || undefined,
+        responsavel_principal_id: projeto.responsavel_principal_id || undefined,
+        status: projeto.status || "ativo",
+        data_inicio: projeto.data_inicio || undefined,
+        data_conclusao: projeto.data_conclusao || undefined,
+        created_at: projeto.created_at || undefined,
+        cliente_nome: projeto.cliente?.razao_social,
+        cliente_nome_fantasia: projeto.cliente?.nome_fantasia || undefined,
+        responsavel_nome: projeto.responsavel?.nome,
+        servico_nome: projeto.servico?.servico?.nome,
         total_tarefas: total,
         tarefas_concluidas: concluidas,
         tarefas_atrasadas: atrasadas,
         equipe,
-      } as Projeto & { equipe: any[] };
+      } as Projeto & { equipe: EquipeMembro[] };
     },
     enabled: !!id,
   });
 }
 
+interface ProjetosStats {
+  projetosAtivos: number;
+  tarefasPendentes: number;
+  tarefasAtrasadas: number;
+  onboardings: number;
+}
+
 export function useProjetosStats() {
-  return useQuery({
+  return useQuery<ProjetosStats, SupabaseError>({
     queryKey: ["projetos-stats"],
     queryFn: async () => {
       // Use optimized RPC to get all stats in a single query
@@ -200,7 +276,7 @@ export function useProjetosStats() {
 
       if (error) throw error;
       
-      const stats = data?.[0] || {
+      const stats = (data as ProjetosStatsRPC[])?.[0] || {
         projetos_ativos: 0,
         tarefas_pendentes: 0,
         tarefas_atrasadas: 0,
@@ -218,23 +294,25 @@ export function useProjetosStats() {
   });
 }
 
+interface CreateProjetoInput {
+  cliente_id: string;
+  cliente_servico_id?: string;
+  nome: string;
+  descricao?: string;
+  responsavel_principal_id?: string;
+}
+
 export function useCreateProjeto() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  return useMutation({
-    mutationFn: async (data: {
-      cliente_id: string;
-      cliente_servico_id?: string;
-      nome: string;
-      descricao?: string;
-      responsavel_principal_id?: string;
-    }) => {
+  return useMutation<unknown, SupabaseError, CreateProjetoInput>({
+    mutationFn: async (data) => {
       const { data: projeto, error } = await supabase
         .from("projetos")
         .insert([{
           ...data,
-          status: "ativo",
+          status: "ativo" as StatusProjeto,
         }])
         .select()
         .single();
@@ -246,7 +324,7 @@ export function useCreateProjeto() {
       queryClient.invalidateQueries({ queryKey: ["projetos"] });
       toast({ title: "Projeto criado com sucesso" });
     },
-    onError: (error: any) => {
+    onError: (error) => {
       toast({
         title: "Erro ao criar projeto",
         description: error.message,
@@ -256,22 +334,21 @@ export function useCreateProjeto() {
   });
 }
 
+interface UpdateProjetoInput {
+  id: string;
+  nome?: string;
+  descricao?: string;
+  responsavel_principal_id?: string;
+  status?: StatusProjeto;
+  data_conclusao?: string;
+}
+
 export function useUpdateProjeto() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  return useMutation({
-    mutationFn: async ({
-      id,
-      ...data
-    }: {
-      id: string;
-      nome?: string;
-      descricao?: string;
-      responsavel_principal_id?: string;
-      status?: Projeto["status"];
-      data_conclusao?: string;
-    }) => {
+  return useMutation<void, SupabaseError, UpdateProjetoInput>({
+    mutationFn: async ({ id, ...data }) => {
       const { error } = await supabase
         .from("projetos")
         .update(data)
@@ -284,7 +361,7 @@ export function useUpdateProjeto() {
       queryClient.invalidateQueries({ queryKey: ["projeto"] });
       toast({ title: "Projeto atualizado" });
     },
-    onError: (error: any) => {
+    onError: (error) => {
       toast({
         title: "Erro ao atualizar projeto",
         description: error.message,
@@ -317,8 +394,23 @@ export interface TemplateTarefa {
   setor_responsavel?: string;
 }
 
+interface TemplateTarefaEmbedded {
+  id: string;
+  prazo_dias: number | null;
+}
+
+interface TemplateQueryResult {
+  id: string;
+  servico_id: string;
+  nome: string;
+  ativo: boolean | null;
+  created_at: string | null;
+  servico: { nome: string } | null;
+  tarefas: TemplateTarefaEmbedded[];
+}
+
 export function useTemplatesOnboarding() {
-  return useQuery({
+  return useQuery<TemplateOnboarding[], SupabaseError>({
     queryKey: ["templates-onboarding"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -332,15 +424,15 @@ export function useTemplatesOnboarding() {
 
       if (error) throw error;
 
-      return data.map((t): TemplateOnboarding => ({
+      return (data as TemplateQueryResult[]).map((t): TemplateOnboarding => ({
         id: t.id,
         servico_id: t.servico_id,
         nome: t.nome,
         ativo: t.ativo ?? true,
-        created_at: t.created_at,
+        created_at: t.created_at || undefined,
         servico_nome: t.servico?.nome,
         tarefas_count: t.tarefas?.length || 0,
-        duracao_estimada: t.tarefas?.reduce((max: number, tarefa: any) => 
+        duracao_estimada: t.tarefas?.reduce((max, tarefa) => 
           Math.max(max, tarefa.prazo_dias || 0), 0) || 0,
       }));
     },
@@ -348,7 +440,7 @@ export function useTemplatesOnboarding() {
 }
 
 export function useTemplateTarefas(templateId: string) {
-  return useQuery({
+  return useQuery<TemplateTarefa[], SupabaseError>({
     queryKey: ["template-tarefas", templateId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -364,18 +456,17 @@ export function useTemplateTarefas(templateId: string) {
   });
 }
 
+interface UpdateTemplateInput {
+  id: string;
+  ativo: boolean;
+}
+
 export function useUpdateTemplate() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  return useMutation({
-    mutationFn: async ({
-      id,
-      ativo,
-    }: {
-      id: string;
-      ativo: boolean;
-    }) => {
+  return useMutation<void, SupabaseError, UpdateTemplateInput>({
+    mutationFn: async ({ id, ativo }) => {
       const { error } = await supabase
         .from("templates_onboarding")
         .update({ ativo })
@@ -394,8 +485,8 @@ export function useCreateTemplateTarefa() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  return useMutation({
-    mutationFn: async (data: Omit<TemplateTarefa, "id">) => {
+  return useMutation<unknown, SupabaseError, Omit<TemplateTarefa, "id">>({
+    mutationFn: async (data) => {
       const { data: tarefa, error } = await supabase
         .from("template_onboarding_tarefas")
         .insert([data])
@@ -416,11 +507,8 @@ export function useCreateTemplateTarefa() {
 export function useUpdateTemplateTarefa() {
   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: async ({
-      id,
-      ...data
-    }: Partial<TemplateTarefa> & { id: string }) => {
+  return useMutation<void, SupabaseError, Partial<TemplateTarefa> & { id: string }>({
+    mutationFn: async ({ id, ...data }) => {
       const { error } = await supabase
         .from("template_onboarding_tarefas")
         .update(data)
@@ -439,8 +527,8 @@ export function useDeleteTemplateTarefa() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  return useMutation({
-    mutationFn: async (id: string) => {
+  return useMutation<void, SupabaseError, string>({
+    mutationFn: async (id) => {
       const { error } = await supabase
         .from("template_onboarding_tarefas")
         .delete()
@@ -458,24 +546,32 @@ export function useDeleteTemplateTarefa() {
 
 // ============= DISPARAR ONBOARDING =============
 
+interface DispararOnboardingInput {
+  clienteId: string;
+  clienteNome: string;
+  servicoId: string;
+  responsavelId: string;
+  clienteServicoId?: string;
+}
+
+interface TemplateComTarefas {
+  id: string;
+  nome: string;
+  tarefas: TemplateTarefa[];
+}
+
 export function useDispararOnboarding() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const { toast } = useToast();
 
-  return useMutation({
+  return useMutation<unknown, SupabaseError, DispararOnboardingInput>({
     mutationFn: async ({
       clienteId,
       clienteNome,
       servicoId,
       responsavelId,
       clienteServicoId,
-    }: {
-      clienteId: string;
-      clienteNome: string;
-      servicoId: string;
-      responsavelId: string;
-      clienteServicoId?: string;
     }) => {
       if (!user) throw new Error("Usuário não autenticado");
 
@@ -488,93 +584,76 @@ export function useDispararOnboarding() {
         `)
         .eq("servico_id", servicoId)
         .eq("ativo", true)
-        .single();
+        .maybeSingle();
 
-      if (templateError || !template) {
+      if (templateError) throw templateError;
+      if (!template) {
         console.log("Nenhum template ativo para este serviço");
         return null;
       }
 
+      const templateData = template as TemplateComTarefas;
+
       // 2. Criar projeto
       const { data: projeto, error: projetoError } = await supabase
         .from("projetos")
-        .insert([{
+        .insert({
           cliente_id: clienteId,
           cliente_servico_id: clienteServicoId,
-          nome: `Onboarding ${template.nome} - ${clienteNome}`,
+          nome: `Onboarding - ${clienteNome}`,
           responsavel_principal_id: responsavelId,
-          status: "ativo",
-        }])
+          status: "ativo" as StatusProjeto,
+        })
         .select()
         .single();
 
       if (projetoError) throw projetoError;
 
-      // 3. Buscar etapa padrão (Backlog)
+      // 3. Buscar etapa padrão do kanban
       const { data: etapaPadrao } = await supabase
         .from("etapas_kanban")
         .select("id")
         .eq("is_default", true)
-        .single();
+        .maybeSingle();
 
-      if (!etapaPadrao) {
-        const { data: primeiraEtapa } = await supabase
-          .from("etapas_kanban")
-          .select("id")
-          .order("ordem", { ascending: true })
-          .limit(1)
-          .single();
-        
-        if (!primeiraEtapa) throw new Error("Nenhuma etapa kanban encontrada");
-        etapaPadrao.id = primeiraEtapa.id;
-      }
+      const etapaId = etapaPadrao?.id;
+      if (!etapaId) throw new Error("Etapa padrão não encontrada");
 
       // 4. Criar tarefas do template
-      const dataAtivacao = new Date();
-      const tarefas = template.tarefas || [];
-
-      for (const tarefaTemplate of tarefas) {
-        const dataVencimento = tarefaTemplate.prazo_dias
-          ? addDays(dataAtivacao, tarefaTemplate.prazo_dias)
-          : null;
-
-        await supabase.from("tarefas").insert([{
-          projeto_id: projeto.id,
-          cliente_id: clienteId,
-          etapa_id: etapaPadrao.id,
-          titulo: tarefaTemplate.titulo,
-          descricao: tarefaTemplate.descricao,
-          responsavel_id: responsavelId,
-          data_vencimento: dataVencimento?.toISOString(),
-          prioridade: "media",
-          created_by_id: user.id,
-        }]);
-      }
-
-      // 5. Registrar na timeline do cliente
-      await supabase.from("cliente_timeline").insert([{
+      const hoje = new Date();
+      const tarefasParaInserir = templateData.tarefas.map((tarefa, index) => ({
+        projeto_id: projeto.id,
         cliente_id: clienteId,
-        tipo: "servico_adicionado",
-        descricao: `Onboarding iniciado: ${template.nome}`,
-        realizado_por_id: user.id,
-      }]);
+        etapa_id: etapaId,
+        titulo: tarefa.titulo,
+        descricao: tarefa.descricao,
+        data_vencimento: tarefa.prazo_dias
+          ? addDays(hoje, tarefa.prazo_dias).toISOString()
+          : null,
+        ordem: index,
+        created_by_id: user.id,
+      }));
+
+      if (tarefasParaInserir.length > 0) {
+        const { error: tarefasError } = await supabase
+          .from("tarefas")
+          .insert(tarefasParaInserir);
+
+        if (tarefasError) throw tarefasError;
+      }
 
       return projeto;
     },
-    onSuccess: (projeto) => {
-      if (projeto) {
+    onSuccess: (data) => {
+      if (data) {
         queryClient.invalidateQueries({ queryKey: ["projetos"] });
         queryClient.invalidateQueries({ queryKey: ["tarefas"] });
-        queryClient.invalidateQueries({ queryKey: ["cliente-timeline"] });
-        toast({
-          title: "Onboarding iniciado",
-          description: `Projeto criado com as tarefas do template`,
-        });
+        toast({ title: "Onboarding iniciado com sucesso!" });
       }
     },
-    onError: (error: any) => {
+    onError: (error) => {
       toast({
-        title: "Erro ao disparar onboarding",
+        title: "Erro ao iniciar onboarding",
         description: error.message,
         variant: "destructive",
       });
