@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { useToast } from "@/hooks/use-toast";
 import { Database } from "@/integrations/supabase/types";
 import type { 
   EmbeddedFollowUp, 
@@ -197,10 +198,15 @@ interface UpdateLeadEtapaInput {
   etapa: EtapaSDR;
 }
 
+interface OptimisticContext {
+  previousLeads: LeadSDR[] | undefined;
+}
+
 export function useUpdateLeadEtapa() {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
-  return useMutation<void, SupabaseError, UpdateLeadEtapaInput>({
+  return useMutation<void, SupabaseError, UpdateLeadEtapaInput, OptimisticContext>({
     mutationFn: async ({ leadId, etapa }) => {
       const { error } = await supabase
         .from("leads")
@@ -209,7 +215,44 @@ export function useUpdateLeadEtapa() {
 
       if (error) throw error;
     },
-    onSuccess: () => {
+    onMutate: async ({ leadId, etapa }) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ["leads-sdr"] });
+
+      // Snapshot the previous value
+      const previousLeads = queryClient.getQueryData<LeadSDR[]>(["leads-sdr"]);
+
+      // Optimistically update to the new value
+      queryClient.setQueriesData<LeadSDR[]>(
+        { queryKey: ["leads-sdr"] },
+        (old) => {
+          if (!old) return old;
+          return old.map((lead) =>
+            lead.id === leadId ? { ...lead, etapa_sdr: etapa } : lead
+          );
+        }
+      );
+
+      // Return a context object with the snapshotted value
+      return { previousLeads };
+    },
+    onError: (error, _variables, context) => {
+      // Rollback to the previous value on error
+      if (context?.previousLeads) {
+        queryClient.setQueriesData<LeadSDR[]>(
+          { queryKey: ["leads-sdr"] },
+          context.previousLeads
+        );
+      }
+
+      toast({
+        title: "Erro ao mover lead",
+        description: error.message || "Não foi possível atualizar a etapa. Tente novamente.",
+        variant: "destructive",
+      });
+    },
+    onSettled: () => {
+      // Always refetch after error or success to ensure data consistency
       queryClient.invalidateQueries({ queryKey: ["leads-sdr"] });
     },
   });

@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { useToast } from "@/hooks/use-toast";
 import { Database } from "@/integrations/supabase/types";
 import type { 
   EmbeddedFollowUp, 
@@ -215,10 +216,15 @@ interface UpdateLeadEtapaCloserInput {
   etapa: EtapaCloser;
 }
 
+interface OptimisticContextCloser {
+  previousLeads: LeadCloser[] | undefined;
+}
+
 export function useUpdateLeadEtapaCloser() {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
-  return useMutation<void, SupabaseError, UpdateLeadEtapaCloserInput>({
+  return useMutation<void, SupabaseError, UpdateLeadEtapaCloserInput, OptimisticContextCloser>({
     mutationFn: async ({ leadId, etapa }) => {
       const updateData: LeadUpdate = { etapa_closer: etapa };
 
@@ -234,7 +240,44 @@ export function useUpdateLeadEtapaCloser() {
 
       if (error) throw error;
     },
-    onSuccess: () => {
+    onMutate: async ({ leadId, etapa }) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ["leads-closer"] });
+
+      // Snapshot the previous value
+      const previousLeads = queryClient.getQueryData<LeadCloser[]>(["leads-closer"]);
+
+      // Optimistically update to the new value
+      queryClient.setQueriesData<LeadCloser[]>(
+        { queryKey: ["leads-closer"] },
+        (old) => {
+          if (!old) return old;
+          return old.map((lead) =>
+            lead.id === leadId ? { ...lead, etapa_closer: etapa } : lead
+          );
+        }
+      );
+
+      // Return a context object with the snapshotted value
+      return { previousLeads };
+    },
+    onError: (error, _variables, context) => {
+      // Rollback to the previous value on error
+      if (context?.previousLeads) {
+        queryClient.setQueriesData<LeadCloser[]>(
+          { queryKey: ["leads-closer"] },
+          context.previousLeads
+        );
+      }
+
+      toast({
+        title: "Erro ao mover lead",
+        description: error.message || "Não foi possível atualizar a etapa. Tente novamente.",
+        variant: "destructive",
+      });
+    },
+    onSettled: () => {
+      // Always refetch after error or success to ensure data consistency
       queryClient.invalidateQueries({ queryKey: ["leads-closer"] });
     },
   });
