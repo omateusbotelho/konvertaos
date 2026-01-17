@@ -102,9 +102,13 @@ function ListWidgetSkeleton({ title }: { title: string }) {
       </KonvertaCardHeader>
       <div className="flex-1 space-y-2">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="p-3 rounded-lg bg-background">
-            <Skeleton className="h-4 w-3/4 mb-1" />
-            <Skeleton className="h-3 w-1/2" />
+          <div key={i} className="flex items-center gap-3 p-3 rounded-lg bg-background">
+            <Skeleton className="h-8 w-8 rounded-full" />
+            <div className="flex-1 space-y-1.5">
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-3 w-1/2" />
+            </div>
+            <Skeleton className="h-5 w-14 rounded-full" />
           </div>
         ))}
       </div>

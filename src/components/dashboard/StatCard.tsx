@@ -102,13 +102,14 @@ export function StatCardSkeleton() {
     <KonvertaCard>
       <div className="flex items-start justify-between">
         <div className="flex-1 space-y-2">
-          <Skeleton className="h-4 w-24" />
-          <Skeleton className="h-8 w-16" />
+          <Skeleton className="h-4 w-28" />
+          <Skeleton className="h-8 w-20" />
         </div>
         <Skeleton className="h-9 w-9 rounded-lg" />
       </div>
-      <div className="mt-3">
-        <Skeleton className="h-4 w-32" />
+      <div className="mt-3 flex items-center gap-2">
+        <Skeleton className="h-5 w-16 rounded" />
+        <Skeleton className="h-4 w-24" />
       </div>
     </KonvertaCard>
   );

@@ -284,12 +284,13 @@ export default function Clientes() {
         {/* Filters */}
         <div className="flex flex-wrap items-center gap-3 p-4 bg-card/50 rounded-lg border border-border/20">
           <div className="relative flex-1 min-w-[200px] max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
             <Input
               placeholder="Buscar por nome, CNPJ, e-mail..."
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
               className="pl-9"
+              aria-label="Buscar clientes por nome, CNPJ ou e-mail"
             />
           </div>
 
