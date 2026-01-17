@@ -38,6 +38,11 @@ const NPSDashboard = lazy(() => import("./pages/nps/NPSDashboard"));
 const NPSPesquisa = lazy(() => import("./pages/nps/NPSPesquisa"));
 const NPSConfig = lazy(() => import("./pages/nps/NPSConfig"));
 const Notificacoes = lazy(() => import("./pages/Notificacoes"));
+const Ranking = lazy(() => import("./pages/Ranking"));
+const Configuracoes = lazy(() => import("./pages/configuracoes/Configuracoes"));
+const SLAConfig = lazy(() => import("./pages/configuracoes/SLAConfig"));
+const Auditoria = lazy(() => import("./pages/configuracoes/Auditoria"));
+const InstalarApp = lazy(() => import("./pages/InstalarApp"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -218,6 +223,40 @@ const App = () => (
                   </ProtectedRoute>
                 }
               />
+
+              <Route
+                path="/ranking"
+                element={
+                  <ProtectedRoute>
+                    <Ranking />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/configuracoes"
+                element={
+                  <ProtectedRoute requireAdmin>
+                    <Configuracoes />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/configuracoes/sla"
+                element={
+                  <ProtectedRoute requireAdmin>
+                    <SLAConfig />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/configuracoes/auditoria"
+                element={
+                  <ProtectedRoute requireAdmin>
+                    <Auditoria />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/instalar" element={<InstalarApp />} />
 
               {/* Catch-all */}
               <Route path="*" element={<NotFound />} />

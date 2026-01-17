@@ -7,7 +7,7 @@ import {
   Users,
   FolderKanban,
   Calendar,
-  FileText,
+  CheckSquare,
   Settings,
   ChevronLeft,
   ChevronRight,
@@ -15,6 +15,10 @@ import {
   MoreHorizontal,
   User,
   UsersRound,
+  Trophy,
+  Banknote,
+  Target,
+  Snowflake,
 } from "lucide-react";
 import { KonvertaAvatar } from "@/components/ui/konverta-avatar";
 import konvertaLogo from "@/assets/konverta-logo.png";
@@ -29,14 +33,19 @@ import {
 
 const navItems = [
   { title: "Dashboard", href: "/", icon: LayoutDashboard },
+  { title: "Pipeline SDR", href: "/comercial/sdr", icon: Target },
+  { title: "Pipeline Closer", href: "/comercial/closer", icon: Target },
+  { title: "Leads Frios", href: "/comercial/leads-frios", icon: Snowflake },
   { title: "Clientes", href: "/clientes", icon: Users },
+  { title: "Tarefas", href: "/tarefas", icon: CheckSquare },
   { title: "Projetos", href: "/projetos", icon: FolderKanban },
   { title: "Calendário", href: "/calendario", icon: Calendar },
-  { title: "Relatórios", href: "/relatorios", icon: FileText },
+  { title: "Ranking", href: "/ranking", icon: Trophy },
 ];
 
 const adminNavItems = [
   { title: "Equipe", href: "/equipe", icon: UsersRound },
+  { title: "Financeiro", href: "/financeiro", icon: Banknote },
 ];
 
 const bottomNavItems = [
