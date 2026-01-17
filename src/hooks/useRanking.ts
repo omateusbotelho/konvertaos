@@ -45,66 +45,70 @@ export function useRanking(mes?: Date, setor?: string) {
       if (colabError) throw colabError;
       if (!colaboradores?.length) return [];
 
-      // Para cada colaborador, calcular métricas
-      const ranking: RankingItem[] = await Promise.all(
-        colaboradores.map(async (colab) => {
-          // Tarefas concluídas no mês
-          const { count: tarefasConcluidas } = await supabase
-            .from('tarefas')
-            .select('*', { count: 'exact', head: true })
-            .eq('responsavel_id', colab.id)
-            .eq('concluida', true)
-            .gte('concluida_em', inicioMes.toISOString())
-            .lte('concluida_em', fimMes.toISOString());
+      // Buscar todas as tarefas concluídas no período de uma vez (otimização)
+      const colaboradorIds = colaboradores.map(c => c.id);
+      const { data: todasTarefas } = await supabase
+        .from('tarefas')
+        .select('id, responsavel_id, cliente_id, data_vencimento, concluida_em')
+        .in('responsavel_id', colaboradorIds)
+        .eq('concluida', true)
+        .gte('concluida_em', inicioMes.toISOString())
+        .lte('concluida_em', fimMes.toISOString());
 
-          // Tarefas concluídas no prazo
-          const { data: tarefasPrazo } = await supabase
-            .from('tarefas')
-            .select('id, data_vencimento, concluida_em')
-            .eq('responsavel_id', colab.id)
-            .eq('concluida', true)
-            .gte('concluida_em', inicioMes.toISOString())
-            .lte('concluida_em', fimMes.toISOString());
+      // Agrupar métricas por colaborador
+      const metricas: Record<string, { tarefas: typeof todasTarefas }> = {};
+      colaboradorIds.forEach(id => {
+        metricas[id] = { tarefas: [] };
+      });
 
-          const tarefasNoPrazo = tarefasPrazo?.filter(t => 
-            t.data_vencimento && t.concluida_em && 
-            new Date(t.concluida_em) <= new Date(t.data_vencimento)
-          ).length || 0;
+      (todasTarefas || []).forEach(tarefa => {
+        if (tarefa.responsavel_id && metricas[tarefa.responsavel_id]) {
+          metricas[tarefa.responsavel_id].tarefas.push(tarefa);
+        }
+      });
 
-          const taxaPrazo = tarefasConcluidas && tarefasConcluidas > 0 
-            ? Math.round((tarefasNoPrazo / tarefasConcluidas) * 100) 
-            : 0;
+      // Calcular ranking para cada colaborador
+      const ranking: RankingItem[] = colaboradores.map((colab) => {
+        const tarefasColab = metricas[colab.id]?.tarefas || [];
+        const tarefasConcluidas = tarefasColab.length;
 
-          // Clientes atendidos (tarefas únicas por cliente)
-          const { data: clientesData } = await supabase
-            .from('tarefas')
-            .select('cliente_id')
-            .eq('responsavel_id', colab.id)
-            .eq('concluida', true)
-            .gte('concluida_em', inicioMes.toISOString())
-            .lte('concluida_em', fimMes.toISOString());
+        // Tarefas concluídas no prazo
+        const tarefasNoPrazo = tarefasColab.filter(t => 
+          t.data_vencimento && t.concluida_em && 
+          new Date(t.concluida_em) <= new Date(t.data_vencimento)
+        ).length;
 
-          const clientesUnicos = new Set(clientesData?.map(t => t.cliente_id) || []);
+        // Taxa de prazo: corrigido para retornar 100% se não há tarefas (não penalizar)
+        // ou 0% se há tarefas mas nenhuma no prazo
+        const taxaPrazo = tarefasConcluidas === 0 
+          ? 100 // Sem tarefas = não penaliza
+          : Math.round((tarefasNoPrazo / tarefasConcluidas) * 100);
 
-          // Pontuação: tarefas * taxa_prazo / 100 + clientes * 5
-          const pontuacao = Math.round(
-            (tarefasConcluidas || 0) * (taxaPrazo / 100) + clientesUnicos.size * 5
-          );
+        // Clientes únicos atendidos
+        const clientesUnicos = new Set(
+          tarefasColab
+            .map(t => t.cliente_id)
+            .filter((id): id is string => id !== null)
+        );
 
-          return {
-            id: colab.id,
-            nome: colab.nome,
-            avatar_url: colab.avatar_url,
-            cargo: colab.cargo,
-            setor: colab.setor,
-            tarefas_concluidas: tarefasConcluidas || 0,
-            tarefas_no_prazo: tarefasNoPrazo,
-            taxa_prazo: taxaPrazo,
-            clientes_atendidos: clientesUnicos.size,
-            pontuacao
-          };
-        })
-      );
+        // Pontuação: tarefas * taxa_prazo / 100 + clientes * 5
+        const pontuacao = Math.round(
+          tarefasConcluidas * (taxaPrazo / 100) + clientesUnicos.size * 5
+        );
+
+        return {
+          id: colab.id,
+          nome: colab.nome,
+          avatar_url: colab.avatar_url,
+          cargo: colab.cargo,
+          setor: colab.setor,
+          tarefas_concluidas: tarefasConcluidas,
+          tarefas_no_prazo: tarefasNoPrazo,
+          taxa_prazo: taxaPrazo,
+          clientes_atendidos: clientesUnicos.size,
+          pontuacao
+        };
+      });
 
       // Ordenar por pontuação
       return ranking.sort((a, b) => b.pontuacao - a.pontuacao);
