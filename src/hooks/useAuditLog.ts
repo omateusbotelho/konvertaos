@@ -11,6 +11,8 @@ export interface AuditLogEntry {
   dados_novos: Record<string, unknown> | null;
   ip_address: string | null;
   user_agent: string | null;
+  usuario_cargo: string | null;
+  usuario_setor: string | null;
   created_at: string;
   usuario?: { nome: string; avatar_url: string | null } | null;
 }
@@ -19,6 +21,8 @@ export interface AuditLogFilters {
   usuario_id?: string;
   acao?: string;
   entidade?: string;
+  usuario_cargo?: string;
+  usuario_setor?: string;
   dataInicio?: Date;
   dataFim?: Date;
 }
@@ -44,6 +48,12 @@ export function useAuditLog(filters?: AuditLogFilters, page = 0, pageSize = 20) 
       }
       if (filters?.entidade) {
         query = query.eq('entidade', filters.entidade);
+      }
+      if (filters?.usuario_cargo) {
+        query = query.eq('usuario_cargo', filters.usuario_cargo);
+      }
+      if (filters?.usuario_setor) {
+        query = query.eq('usuario_setor', filters.usuario_setor);
       }
       if (filters?.dataInicio) {
         query = query.gte('created_at', filters.dataInicio.toISOString());
@@ -89,6 +99,44 @@ export function useAuditUsuarios() {
 
       if (error) throw error;
       return data || [];
+    }
+  });
+}
+
+// Hook para listar cargos únicos no audit log (para filtros)
+export function useAuditCargos() {
+  return useQuery({
+    queryKey: ['audit-cargos'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('audit_log')
+        .select('usuario_cargo')
+        .not('usuario_cargo', 'is', null)
+        .limit(100);
+
+      if (error) throw error;
+      
+      const cargos = [...new Set(data?.map(d => d.usuario_cargo).filter(Boolean) || [])];
+      return cargos.sort() as string[];
+    }
+  });
+}
+
+// Hook para listar setores únicos no audit log (para filtros)
+export function useAuditSetores() {
+  return useQuery({
+    queryKey: ['audit-setores'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('audit_log')
+        .select('usuario_setor')
+        .not('usuario_setor', 'is', null)
+        .limit(100);
+
+      if (error) throw error;
+      
+      const setores = [...new Set(data?.map(d => d.usuario_setor).filter(Boolean) || [])];
+      return setores.sort() as string[];
     }
   });
 }

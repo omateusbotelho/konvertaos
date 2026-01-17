@@ -70,7 +70,9 @@ export type Database = {
           id: string
           ip_address: string | null
           user_agent: string | null
+          usuario_cargo: string | null
           usuario_id: string | null
+          usuario_setor: string | null
         }
         Insert: {
           acao: string
@@ -82,7 +84,9 @@ export type Database = {
           id?: string
           ip_address?: string | null
           user_agent?: string | null
+          usuario_cargo?: string | null
           usuario_id?: string | null
+          usuario_setor?: string | null
         }
         Update: {
           acao?: string
@@ -94,7 +98,9 @@ export type Database = {
           id?: string
           ip_address?: string | null
           user_agent?: string | null
+          usuario_cargo?: string | null
           usuario_id?: string | null
+          usuario_setor?: string | null
         }
         Relationships: [
           {
