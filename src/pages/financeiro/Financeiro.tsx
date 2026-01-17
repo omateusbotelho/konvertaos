@@ -13,6 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { DollarSign, TrendingDown, BarChart3, AlertTriangle, Download, ChevronRight, CalendarDays, Wrench } from "lucide-react";
+import { TableEmptyState } from "@/components/ui/empty-state";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -229,6 +230,15 @@ export default function Financeiro() {
                           Carregando...
                         </TableCell>
                       </TableRow>
+                    ) : !cobrancas || cobrancas.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={5} className="p-0 border-0">
+                          <TableEmptyState
+                            title="Nenhuma cobrança no período"
+                            description="As cobranças aparecerão aqui quando existirem"
+                          />
+                        </TableCell>
+                      </TableRow>
                     ) : cobrancas?.slice(0, 5).map(cobranca => (
                       <TableRow key={cobranca.id}>
                         <TableCell className="font-medium">
@@ -294,6 +304,15 @@ export default function Financeiro() {
                       <TableRow>
                         <TableCell colSpan={6} className="text-center py-4">
                           Carregando...
+                        </TableCell>
+                      </TableRow>
+                    ) : !comissoes || comissoes.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="p-0 border-0">
+                          <TableEmptyState
+                            title="Nenhuma comissão pendente"
+                            description="Novas comissões aparecerão aqui quando forem geradas"
+                          />
                         </TableCell>
                       </TableRow>
                     ) : comissoes?.slice(0, 5).map(comissao => (
