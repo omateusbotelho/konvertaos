@@ -11,7 +11,7 @@ export function AppHeader() {
   return (
     <header
       className={cn(
-        "fixed top-0 right-0 z-30 h-16 bg-background/80 backdrop-blur-sm border-b border-border/20 transition-all duration-300",
+        "fixed top-0 right-0 z-30 h-16 bg-background/70 backdrop-blur-md border-b border-border/30 shadow-sm transition-all duration-300",
         isCollapsed ? "lg:left-16" : "lg:left-60",
         "left-0"
       )}
