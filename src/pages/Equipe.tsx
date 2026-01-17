@@ -172,6 +172,7 @@ export default function Equipe() {
     setInviteLink(link);
     setInviteLoading(false);
     toast.success("Convite criado com sucesso!");
+    resetInviteForm();
   };
 
   const copyLink = async () => {
