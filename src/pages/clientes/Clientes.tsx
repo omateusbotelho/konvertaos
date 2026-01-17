@@ -56,6 +56,7 @@ import {
   PlusCircle,
   XCircle,
 } from "lucide-react";
+import { TableEmptyState } from "@/components/ui/empty-state";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -334,8 +335,11 @@ function ClientesTable({ clientes, onView }: { clientes: any[]; onView: (id: str
         <TableBody>
           {clientes.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                Nenhum cliente encontrado
+              <TableCell colSpan={7} className="p-0 border-0">
+                <TableEmptyState
+                  title="Nenhum cliente encontrado"
+                  description="Ajuste os filtros ou cadastre um novo cliente para começar"
+                />
               </TableCell>
             </TableRow>
           ) : (
@@ -431,9 +435,10 @@ function ClientesCards({ clientes, onView }: { clientes: any[]; onView: (id: str
 
   if (clientes.length === 0) {
     return (
-      <div className="text-center py-12 text-muted-foreground">
-        Nenhum cliente encontrado
-      </div>
+      <TableEmptyState
+        title="Nenhum cliente encontrado"
+        description="Ajuste os filtros ou cadastre um novo cliente para começar"
+      />
     );
   }
 
