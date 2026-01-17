@@ -229,11 +229,33 @@ export default function Calendario() {
                   </div>
 
                   <div className="space-y-1">
+                    {/* Ausências primeiro (multi-day events) */}
+                    {events?.ausencias.slice(0, 1).map(ausencia => {
+                      const isStart = isSameDay(day, new Date(ausencia.data_inicio));
+                      const isEnd = isSameDay(day, new Date(ausencia.data_fim));
+                      return (
+                        <div 
+                          key={ausencia.id} 
+                          className={cn(
+                            "text-xs p-1 bg-red-500/90 text-white truncate flex items-center gap-1",
+                            isStart && "rounded-l",
+                            isEnd && "rounded-r",
+                            !isStart && !isEnd && "rounded-none",
+                            isStart && isEnd && "rounded"
+                          )}
+                        >
+                          {isStart && "🏖️"} {ausencia.colaborador?.nome} 
+                          {isStart && <span className="opacity-75 text-[10px]">({ausencia.tipo})</span>}
+                        </div>
+                      );
+                    })}
+                    
+                    {/* Reuniões com badges de tipo */}
                     {events?.reunioes.slice(0, 3).map(reuniao => (
                       <div
                         key={reuniao.id}
                         className={cn(
-                          'text-xs p-1 rounded truncate text-white cursor-pointer',
+                          'text-xs p-1 rounded truncate text-white cursor-pointer flex items-center gap-1',
                           coresReuniao[reuniao.tipo]
                         )}
                         onClick={(e) => {
@@ -241,14 +263,25 @@ export default function Calendario() {
                           setSelectedReuniao(reuniao.id);
                         }}
                       >
-                        {format(new Date(reuniao.data_inicio), 'HH:mm')} {reuniao.titulo}
+                        {/* Badge indicador de tipo */}
+                        {reuniao.tipo === 'cliente' && (
+                          <span className="bg-white/30 px-1 rounded text-[10px] font-semibold shrink-0">CLI</span>
+                        )}
+                        {reuniao.tipo === 'weekly' && (
+                          <span className="bg-white/30 px-1 rounded text-[10px] font-semibold shrink-0">EQ</span>
+                        )}
+                        {reuniao.tipo === '1:1' && (
+                          <span className="bg-white/30 px-1 rounded text-[10px] font-semibold shrink-0">1:1</span>
+                        )}
+                        {reuniao.tipo === 'projeto' && (
+                          <span className="bg-white/30 px-1 rounded text-[10px] font-semibold shrink-0">PRJ</span>
+                        )}
+                        <span className="truncate">
+                          {format(new Date(reuniao.data_inicio), 'HH:mm')} {reuniao.titulo}
+                        </span>
                       </div>
                     ))}
-                    {events?.ausencias.slice(0, 1).map(ausencia => (
-                      <div key={ausencia.id} className="text-xs p-1 rounded bg-red-500 text-white truncate">
-                        🏖️ {ausencia.colaborador?.nome}
-                      </div>
-                    ))}
+                    
                     {events && (events.reunioes.length + events.ausencias.length) > 4 && (
                       <div className="text-xs text-muted-foreground">
                         +{events.reunioes.length + events.ausencias.length - 4} mais
