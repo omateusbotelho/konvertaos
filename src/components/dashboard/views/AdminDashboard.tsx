@@ -51,7 +51,7 @@ export default function AdminDashboard({ data }: AdminDashboardProps) {
           label="Leads Novos"
           value={data.leadsNovos.valor}
           variacao={data.leadsNovos.variacao}
-          href="/leads"
+          href="/comercial/sdr"
         />
         <StatCard
           icon={AlertTriangle}
@@ -94,13 +94,13 @@ export default function AdminDashboard({ data }: AdminDashboardProps) {
         <ListWidget
           title="Reuniões de Hoje"
           items={data.reunioesHoje}
-          viewAllHref="/agenda"
+          viewAllHref="/calendario"
           emptyMessage="Nenhuma reunião agendada"
         />
         <ListWidget
           title="Aprovações Pendentes"
           items={data.aprovacoesPendentes}
-          viewAllHref="/aprovacoes"
+          viewAllHref="/configuracoes/ausencias"
           emptyMessage="Nenhuma aprovação pendente"
         />
         <AlertWidget
