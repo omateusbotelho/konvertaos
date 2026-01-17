@@ -2265,6 +2265,7 @@ export type Database = {
           titulo: string
         }[]
       }
+      calculate_nps_stats: { Args: never; Returns: Json }
       criar_notificacao: {
         Args: {
           p_dados?: Json

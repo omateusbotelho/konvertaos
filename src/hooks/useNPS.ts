@@ -144,57 +144,32 @@ export function useNPSRespostas(filters?: { periodo?: 'mes' | 'trimestre' | 'ano
   });
 }
 
-// Hook para calcular estatísticas do NPS
+// Hook para calcular estatísticas do NPS (usando RPC otimizada)
 export function useNPSStats() {
   return useQuery({
     queryKey: ['nps-stats'],
     queryFn: async () => {
-      // Buscar todas as respostas
-      const { data: respostas, error: respostasError } = await supabase
-        .from('nps_respostas')
-        .select('score');
+      const { data, error } = await supabase.rpc('calculate_nps_stats');
 
-      if (respostasError) throw respostasError;
+      if (error) throw error;
 
-      // Buscar total de envios para calcular taxa de resposta
-      const { count: totalEnvios, error: enviosError } = await supabase
-        .from('nps_envios')
-        .select('*', { count: 'exact', head: true });
-
-      if (enviosError) throw enviosError;
-
-      const totalRespostas = respostas.length;
-      
-      if (totalRespostas === 0) {
-        return {
-          npsScore: 0,
-          totalRespostas: 0,
-          promotores: 0,
-          neutros: 0,
-          detratores: 0,
-          taxaResposta: 0,
-        } as NPSStats;
-      }
-
-      const promotores = respostas.filter(r => r.score >= 9).length;
-      const neutros = respostas.filter(r => r.score >= 7 && r.score <= 8).length;
-      const detratores = respostas.filter(r => r.score <= 6).length;
-
-      const npsScore = Math.round(
-        ((promotores - detratores) / totalRespostas) * 100
-      );
-
-      const taxaResposta = totalEnvios 
-        ? Math.round((totalRespostas / totalEnvios) * 100) 
-        : 0;
+      // Mapear resposta da RPC para a interface NPSStats
+      const stats = data as {
+        nps_score: number;
+        total_respostas: number;
+        promotores: number;
+        neutros: number;
+        detratores: number;
+        taxa_resposta: number;
+      };
 
       return {
-        npsScore,
-        totalRespostas,
-        promotores,
-        neutros,
-        detratores,
-        taxaResposta,
+        npsScore: stats.nps_score,
+        totalRespostas: stats.total_respostas,
+        promotores: stats.promotores,
+        neutros: stats.neutros,
+        detratores: stats.detratores,
+        taxaResposta: stats.taxa_resposta,
       } as NPSStats;
     },
   });
