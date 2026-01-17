@@ -12,7 +12,6 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 const passwordSchema = z.object({
-  currentPassword: z.string().min(1, "Senha atual é obrigatória"),
   newPassword: z.string().min(8, "Mínimo de 8 caracteres"),
   confirmPassword: z.string(),
 }).refine((data) => data.newPassword === data.confirmPassword, {
@@ -44,12 +43,10 @@ export default function Perfil() {
   const [uploading, setUploading] = useState(false);
   
   // Password form
-  const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [passwordErrors, setPasswordErrors] = useState<{
-    currentPassword?: string;
     newPassword?: string;
     confirmPassword?: string;
   }>({});
@@ -137,7 +134,6 @@ export default function Perfil() {
     setPasswordErrors({});
     
     const result = passwordSchema.safeParse({
-      currentPassword,
       newPassword,
       confirmPassword,
     });
@@ -154,19 +150,6 @@ export default function Perfil() {
 
     setPasswordLoading(true);
 
-    // Verify current password by signing in
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: profile?.email || "",
-      password: currentPassword,
-    });
-
-    if (signInError) {
-      setPasswordErrors({ currentPassword: "Senha atual incorreta" });
-      setPasswordLoading(false);
-      return;
-    }
-
-    // Update password
     const { error: updateError } = await supabase.auth.updateUser({
       password: newPassword,
     });
@@ -175,7 +158,6 @@ export default function Perfil() {
       toast.error("Erro ao alterar senha");
     } else {
       toast.success("Senha alterada com sucesso!");
-      setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
     }
@@ -306,21 +288,6 @@ export default function Perfil() {
           </KonvertaCardHeader>
 
           <div className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Senha atual</label>
-              <Input
-                type="password"
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                placeholder="••••••••"
-              />
-              {passwordErrors.currentPassword && (
-                <p className="text-xs text-destructive flex items-center gap-1">
-                  <AlertCircle className="h-3 w-3" />
-                  {passwordErrors.currentPassword}
-                </p>
-              )}
-            </div>
 
             <div className="space-y-2">
               <label className="text-sm font-medium">Nova senha</label>
