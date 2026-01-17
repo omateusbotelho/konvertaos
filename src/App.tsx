@@ -37,6 +37,7 @@ const MinhasComissoes = lazy(() => import("./pages/MinhasComissoes"));
 const NPSDashboard = lazy(() => import("./pages/nps/NPSDashboard"));
 const NPSPesquisa = lazy(() => import("./pages/nps/NPSPesquisa"));
 const NPSConfig = lazy(() => import("./pages/nps/NPSConfig"));
+const Notificacoes = lazy(() => import("./pages/Notificacoes"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -209,6 +210,14 @@ const App = () => (
               />
               <Route path="/nps" element={<FinanceiroRoute><NPSDashboard /></FinanceiroRoute>} />
               <Route path="/configuracoes/nps" element={<FinanceiroRoute><NPSConfig /></FinanceiroRoute>} />
+              <Route
+                path="/notificacoes"
+                element={
+                  <ProtectedRoute>
+                    <Notificacoes />
+                  </ProtectedRoute>
+                }
+              />
 
               {/* Catch-all */}
               <Route path="*" element={<NotFound />} />
