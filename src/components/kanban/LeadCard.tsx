@@ -133,8 +133,8 @@ function LeadCardComponent({
       {...attributes}
       {...listeners}
       className={cn(
-        "bg-card border border-border/20 rounded-lg p-3 cursor-grab active:cursor-grabbing transition-all hover:border-border/40",
-        isDragging && "opacity-50 scale-105 shadow-2xl rotate-2 z-50"
+        "bg-card border border-border/20 rounded-lg p-3 cursor-grab active:cursor-grabbing transition-all duration-200 hover:border-border/40 hover:shadow-md",
+        isDragging && "opacity-90 scale-105 shadow-2xl shadow-primary/20 rotate-2 z-[100] ring-2 ring-primary/30"
       )}
     >
       {/* Header: Origin Badge + Menu */}
