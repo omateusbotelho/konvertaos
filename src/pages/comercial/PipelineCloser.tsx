@@ -35,9 +35,11 @@ import {
   ModalProposta,
   ModalPerdaCloser,
   ModalFechadoGanho,
+  ModalAtivacaoCliente,
   AgendaRapida,
   LeadDrawerCloser,
 } from "@/components/comercial";
+import type { ClienteData } from "@/components/comercial/ModalAtivacaoCliente";
 import {
   useLeadsCloser,
   useUpdateLeadEtapaCloser,
@@ -100,6 +102,10 @@ export default function PipelineCloser() {
     leadNome: string;
     valorProposta?: number;
   }>({ open: false, leadId: "", leadNome: "" });
+  const [ativacaoModal, setAtivacaoModal] = useState<{
+    open: boolean;
+    lead: LeadCloser | null;
+  }>({ open: false, lead: null });
   const [drawerLead, setDrawerLead] = useState<LeadCloser | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -360,32 +366,113 @@ export default function PipelineCloser() {
 
   const handleConfirmFechado = async () => {
     if (!pendingDrop) return;
-
-    const { error } = await supabase
-      .from("leads")
-      .update({
-        etapa_closer: "fechado_ganho",
-        funil_atual: "convertido",
-        data_conversao: new Date().toISOString(),
-      })
-      .eq("id", pendingDrop.leadId);
-
-    if (error) {
-      toast.error("Erro ao fechar negócio");
+    
+    // Find the lead data to pass to activation modal
+    const lead = leads?.find(l => l.id === pendingDrop.leadId);
+    if (!lead) {
+      toast.error("Lead não encontrado");
       return;
     }
 
-    // Create activity
-    await supabase.from("atividades_lead").insert({
-      lead_id: pendingDrop.leadId,
-      tipo: "anotacao",
-      descricao: "🎉 Negócio fechado com sucesso!",
-      realizado_por_id: profile?.id,
-    });
-
-    toast.success("🎉 Parabéns! Negócio fechado com sucesso!");
-    queryClient.invalidateQueries({ queryKey: ["leads-closer"] });
+    // Close the celebration modal and open activation modal
     setFechadoModal({ open: false, leadId: "", leadNome: "" });
+    setAtivacaoModal({ open: true, lead });
+  };
+
+  const handleConfirmAtivacao = async (data: ClienteData) => {
+    if (!ativacaoModal.lead) return;
+    const lead = ativacaoModal.lead;
+
+    try {
+      // 1. Create client in clientes table
+      const { data: cliente, error: clienteError } = await supabase
+        .from("clientes")
+        .insert({
+          lead_id: lead.id,
+          razao_social: data.razao_social,
+          nome_fantasia: data.nome_fantasia,
+          cnpj: data.cnpj,
+          cpf: data.cpf,
+          telefone: data.telefone,
+          email: data.email,
+          endereco: data.endereco,
+          cidade: data.cidade,
+          estado: data.estado,
+          cep: data.cep,
+          fee_mensal: data.fee_mensal,
+          modelo_cobranca: data.modelo_cobranca,
+          percentual: data.percentual,
+          dia_vencimento: data.dia_vencimento,
+          forma_pagamento: data.forma_pagamento,
+          sdr_responsavel_id: lead.sdr_responsavel_id,
+          closer_responsavel_id: lead.closer_responsavel_id,
+          status: "ativo",
+        })
+        .select()
+        .single();
+
+      if (clienteError) throw clienteError;
+
+      // 2. Create cliente_servicos for each service
+      if (data.servicos.length > 0) {
+        const servicosInsert = data.servicos.map((s) => ({
+          cliente_id: cliente.id,
+          servico_id: s.servico_id,
+          responsavel_id: s.responsavel_id,
+          valor: s.valor,
+          status: "ativo",
+        }));
+
+        const { error: servicosError } = await supabase
+          .from("cliente_servicos")
+          .insert(servicosInsert);
+
+        if (servicosError) {
+          console.error("Error inserting services:", servicosError);
+          // Don't throw - client was created, just log the error
+        }
+      }
+
+      // 3. Update lead to converted status
+      const { error: leadError } = await supabase
+        .from("leads")
+        .update({
+          etapa_closer: "fechado_ganho",
+          funil_atual: "convertido",
+          data_conversao: new Date().toISOString(),
+        })
+        .eq("id", lead.id);
+
+      if (leadError) throw leadError;
+
+      // 4. Create timeline entry
+      await supabase.from("cliente_timeline").insert({
+        cliente_id: cliente.id,
+        tipo: "criado",
+        descricao: `Cliente ativado a partir do lead "${lead.nome}"`,
+        realizado_por_id: profile?.id,
+      });
+
+      // 5. Create activity on lead
+      await supabase.from("atividades_lead").insert({
+        lead_id: lead.id,
+        tipo: "anotacao",
+        descricao: `🎉 Negócio fechado! Cliente ativado com fee de R$ ${data.fee_mensal.toLocaleString("pt-BR")}/mês`,
+        realizado_por_id: profile?.id,
+      });
+
+      toast.success("🎉 Cliente ativado com sucesso!");
+      queryClient.invalidateQueries({ queryKey: ["leads-closer"] });
+      setAtivacaoModal({ open: false, lead: null });
+      setPendingDrop(null);
+    } catch (error) {
+      console.error("Error activating client:", error);
+      toast.error("Erro ao ativar cliente");
+    }
+  };
+
+  const handleCancelAtivacao = () => {
+    setAtivacaoModal({ open: false, lead: null });
     setPendingDrop(null);
   };
 
@@ -679,6 +766,24 @@ export default function PipelineCloser() {
           leadNome={fechadoModal.leadNome}
           valorProposta={fechadoModal.valorProposta}
         />
+
+        {ativacaoModal.lead && (
+          <ModalAtivacaoCliente
+            open={ativacaoModal.open}
+            onOpenChange={(open) => {
+              if (!open) handleCancelAtivacao();
+            }}
+            onConfirm={handleConfirmAtivacao}
+            onCancel={handleCancelAtivacao}
+            leadId={ativacaoModal.lead.id}
+            leadNome={ativacaoModal.lead.nome}
+            leadTelefone={ativacaoModal.lead.telefone}
+            leadEmail={ativacaoModal.lead.email || undefined}
+            valorProposta={ativacaoModal.lead.valor_proposta || undefined}
+            sdrId={ativacaoModal.lead.sdr_responsavel_id || undefined}
+            closerId={ativacaoModal.lead.closer_responsavel_id || undefined}
+          />
+        )}
 
         <LeadDrawerCloser
           open={drawerOpen}
