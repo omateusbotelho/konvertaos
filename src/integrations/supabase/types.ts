@@ -403,6 +403,7 @@ export type Database = {
           created_at: string | null
           data_ativacao: string | null
           data_cancelamento: string | null
+          deleted_at: string | null
           dia_vencimento: number | null
           email: string
           endereco: string | null
@@ -431,6 +432,7 @@ export type Database = {
           created_at?: string | null
           data_ativacao?: string | null
           data_cancelamento?: string | null
+          deleted_at?: string | null
           dia_vencimento?: number | null
           email: string
           endereco?: string | null
@@ -463,6 +465,7 @@ export type Database = {
           created_at?: string | null
           data_ativacao?: string | null
           data_cancelamento?: string | null
+          deleted_at?: string | null
           dia_vencimento?: number | null
           email?: string
           endereco?: string | null
@@ -516,6 +519,7 @@ export type Database = {
           created_at: string | null
           data_pagamento: string | null
           data_vencimento: string
+          deleted_at: string | null
           forma_pagamento: Database["public"]["Enums"]["forma_pagamento"] | null
           id: string
           linha_digitavel: string | null
@@ -535,6 +539,7 @@ export type Database = {
           created_at?: string | null
           data_pagamento?: string | null
           data_vencimento: string
+          deleted_at?: string | null
           forma_pagamento?:
             | Database["public"]["Enums"]["forma_pagamento"]
             | null
@@ -556,6 +561,7 @@ export type Database = {
           created_at?: string | null
           data_pagamento?: string | null
           data_vencimento?: string
+          deleted_at?: string | null
           forma_pagamento?:
             | Database["public"]["Enums"]["forma_pagamento"]
             | null
