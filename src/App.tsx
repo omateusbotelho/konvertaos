@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { AuthProvider } from "@/hooks/use-auth";
-import { ProtectedRoute } from "@/components/auth";
+import { ProtectedRoute, FinanceiroRoute } from "@/components/auth";
 
 // Lazy loaded pages for code splitting
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -25,6 +25,15 @@ const Tarefas = lazy(() => import("./pages/Tarefas"));
 const Projetos = lazy(() => import("./pages/Projetos"));
 const ProjetoDetalhes = lazy(() => import("./pages/ProjetoDetalhes"));
 const OnboardingConfig = lazy(() => import("./pages/OnboardingConfig"));
+const Calendario = lazy(() => import("./pages/Calendario"));
+const Ausencias = lazy(() => import("./pages/Ausencias"));
+const GerenciarAusencias = lazy(() => import("./pages/configuracoes/GerenciarAusencias"));
+const Financeiro = lazy(() => import("./pages/financeiro/Financeiro"));
+const Cobrancas = lazy(() => import("./pages/financeiro/Cobrancas"));
+const Comissoes = lazy(() => import("./pages/financeiro/Comissoes"));
+const Custos = lazy(() => import("./pages/financeiro/Custos"));
+const Relatorios = lazy(() => import("./pages/financeiro/Relatorios"));
+const MinhasComissoes = lazy(() => import("./pages/MinhasComissoes"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -154,6 +163,43 @@ const App = () => (
                 element={
                   <ProtectedRoute requireAdmin>
                     <OnboardingConfig />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/calendario"
+                element={
+                  <ProtectedRoute>
+                    <Calendario />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/ausencias"
+                element={
+                  <ProtectedRoute>
+                    <Ausencias />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/configuracoes/ausencias"
+                element={
+                  <ProtectedRoute requireAdmin>
+                    <GerenciarAusencias />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/financeiro" element={<FinanceiroRoute><Financeiro /></FinanceiroRoute>} />
+              <Route path="/financeiro/cobrancas" element={<FinanceiroRoute><Cobrancas /></FinanceiroRoute>} />
+              <Route path="/financeiro/comissoes" element={<FinanceiroRoute><Comissoes /></FinanceiroRoute>} />
+              <Route path="/financeiro/custos" element={<FinanceiroRoute><Custos /></FinanceiroRoute>} />
+              <Route path="/financeiro/relatorios" element={<FinanceiroRoute><Relatorios /></FinanceiroRoute>} />
+              <Route
+                path="/minhas-comissoes"
+                element={
+                  <ProtectedRoute>
+                    <MinhasComissoes />
                   </ProtectedRoute>
                 }
               />

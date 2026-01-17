@@ -59,6 +59,66 @@ export type Database = {
           },
         ]
       }
+      ausencias: {
+        Row: {
+          aprovado_em: string | null
+          aprovado_por_id: string | null
+          colaborador_id: string
+          created_at: string | null
+          data_fim: string
+          data_inicio: string
+          id: string
+          motivo: string | null
+          observacoes: string | null
+          status: Database["public"]["Enums"]["status_ausencia"] | null
+          tipo: Database["public"]["Enums"]["tipo_ausencia"]
+          updated_at: string | null
+        }
+        Insert: {
+          aprovado_em?: string | null
+          aprovado_por_id?: string | null
+          colaborador_id: string
+          created_at?: string | null
+          data_fim: string
+          data_inicio: string
+          id?: string
+          motivo?: string | null
+          observacoes?: string | null
+          status?: Database["public"]["Enums"]["status_ausencia"] | null
+          tipo: Database["public"]["Enums"]["tipo_ausencia"]
+          updated_at?: string | null
+        }
+        Update: {
+          aprovado_em?: string | null
+          aprovado_por_id?: string | null
+          colaborador_id?: string
+          created_at?: string | null
+          data_fim?: string
+          data_inicio?: string
+          id?: string
+          motivo?: string | null
+          observacoes?: string | null
+          status?: Database["public"]["Enums"]["status_ausencia"] | null
+          tipo?: Database["public"]["Enums"]["tipo_ausencia"]
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ausencias_aprovado_por_id_fkey"
+            columns: ["aprovado_por_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ausencias_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cliente_acessos: {
         Row: {
           cliente_id: string
@@ -1218,6 +1278,216 @@ export type Database = {
           },
         ]
       }
+      reuniao_ata_tarefas: {
+        Row: {
+          ata_id: string
+          created_at: string | null
+          id: string
+          tarefa_id: string
+        }
+        Insert: {
+          ata_id: string
+          created_at?: string | null
+          id?: string
+          tarefa_id: string
+        }
+        Update: {
+          ata_id?: string
+          created_at?: string | null
+          id?: string
+          tarefa_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reuniao_ata_tarefas_ata_id_fkey"
+            columns: ["ata_id"]
+            isOneToOne: false
+            referencedRelation: "reuniao_atas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reuniao_ata_tarefas_tarefa_id_fkey"
+            columns: ["tarefa_id"]
+            isOneToOne: false
+            referencedRelation: "tarefas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reuniao_atas: {
+        Row: {
+          conteudo: string
+          created_at: string | null
+          created_by_id: string
+          id: string
+          reuniao_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          conteudo: string
+          created_at?: string | null
+          created_by_id: string
+          id?: string
+          reuniao_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          conteudo?: string
+          created_at?: string | null
+          created_by_id?: string
+          id?: string
+          reuniao_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reuniao_atas_created_by_id_fkey"
+            columns: ["created_by_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reuniao_atas_reuniao_id_fkey"
+            columns: ["reuniao_id"]
+            isOneToOne: true
+            referencedRelation: "reunioes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reuniao_participantes: {
+        Row: {
+          confirmado: boolean | null
+          created_at: string | null
+          id: string
+          participante_id: string
+          reuniao_id: string
+        }
+        Insert: {
+          confirmado?: boolean | null
+          created_at?: string | null
+          id?: string
+          participante_id: string
+          reuniao_id: string
+        }
+        Update: {
+          confirmado?: boolean | null
+          created_at?: string | null
+          id?: string
+          participante_id?: string
+          reuniao_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reuniao_participantes_participante_id_fkey"
+            columns: ["participante_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reuniao_participantes_reuniao_id_fkey"
+            columns: ["reuniao_id"]
+            isOneToOne: false
+            referencedRelation: "reunioes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reunioes: {
+        Row: {
+          cliente_id: string | null
+          created_at: string | null
+          data_fim: string
+          data_inicio: string
+          descricao: string | null
+          id: string
+          lead_id: string | null
+          local: string | null
+          organizador_id: string
+          projeto_id: string | null
+          recorrencia_config: Json | null
+          recorrente: boolean | null
+          status: Database["public"]["Enums"]["status_reuniao"] | null
+          tipo: Database["public"]["Enums"]["tipo_reuniao"] | null
+          titulo: string
+          updated_at: string | null
+        }
+        Insert: {
+          cliente_id?: string | null
+          created_at?: string | null
+          data_fim: string
+          data_inicio: string
+          descricao?: string | null
+          id?: string
+          lead_id?: string | null
+          local?: string | null
+          organizador_id: string
+          projeto_id?: string | null
+          recorrencia_config?: Json | null
+          recorrente?: boolean | null
+          status?: Database["public"]["Enums"]["status_reuniao"] | null
+          tipo?: Database["public"]["Enums"]["tipo_reuniao"] | null
+          titulo: string
+          updated_at?: string | null
+        }
+        Update: {
+          cliente_id?: string | null
+          created_at?: string | null
+          data_fim?: string
+          data_inicio?: string
+          descricao?: string | null
+          id?: string
+          lead_id?: string | null
+          local?: string | null
+          organizador_id?: string
+          projeto_id?: string | null
+          recorrencia_config?: Json | null
+          recorrente?: boolean | null
+          status?: Database["public"]["Enums"]["status_reuniao"] | null
+          tipo?: Database["public"]["Enums"]["tipo_reuniao"] | null
+          titulo?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reunioes_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reunioes_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "margem_por_cliente"
+            referencedColumns: ["cliente_id"]
+          },
+          {
+            foreignKeyName: "reunioes_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reunioes_organizador_id_fkey"
+            columns: ["organizador_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reunioes_projeto_id_fkey"
+            columns: ["projeto_id"]
+            isOneToOne: false
+            referencedRelation: "projetos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       servicos: {
         Row: {
           ativo: boolean | null
@@ -1761,11 +2031,14 @@ export type Database = {
         | "outro"
       prioridade_tarefa: "baixa" | "media" | "alta" | "urgente"
       setor_tipo: "comercial" | "trafego" | "social_media" | "financeiro"
+      status_ausencia: "pendente" | "aprovada" | "recusada"
       status_cliente: "ativo" | "inadimplente" | "cancelado"
       status_cobranca: "pendente" | "pago" | "atrasado" | "cancelado" | "falhou"
       status_comissao: "pendente" | "aprovada" | "paga" | "cancelada"
       status_projeto: "ativo" | "pausado" | "concluido" | "cancelado"
+      status_reuniao: "agendada" | "realizada" | "cancelada"
       tipo_arquivo: "contrato" | "briefing" | "documento" | "outro"
+      tipo_ausencia: "ferias" | "ausencia"
       tipo_cobranca: "recorrente" | "avulsa"
       tipo_comissao: "sdr" | "closer"
       tipo_historico_tarefa:
@@ -1778,6 +2051,7 @@ export type Database = {
         | "reaberta"
         | "editada"
       tipo_lancamento: "receita" | "despesa"
+      tipo_reuniao: "weekly" | "1:1" | "projeto" | "cliente" | "outro"
       tipo_timeline:
         | "criado"
         | "servico_adicionado"
@@ -1965,11 +2239,14 @@ export const Constants = {
       ],
       prioridade_tarefa: ["baixa", "media", "alta", "urgente"],
       setor_tipo: ["comercial", "trafego", "social_media", "financeiro"],
+      status_ausencia: ["pendente", "aprovada", "recusada"],
       status_cliente: ["ativo", "inadimplente", "cancelado"],
       status_cobranca: ["pendente", "pago", "atrasado", "cancelado", "falhou"],
       status_comissao: ["pendente", "aprovada", "paga", "cancelada"],
       status_projeto: ["ativo", "pausado", "concluido", "cancelado"],
+      status_reuniao: ["agendada", "realizada", "cancelada"],
       tipo_arquivo: ["contrato", "briefing", "documento", "outro"],
+      tipo_ausencia: ["ferias", "ausencia"],
       tipo_cobranca: ["recorrente", "avulsa"],
       tipo_comissao: ["sdr", "closer"],
       tipo_historico_tarefa: [
@@ -1983,6 +2260,7 @@ export const Constants = {
         "editada",
       ],
       tipo_lancamento: ["receita", "despesa"],
+      tipo_reuniao: ["weekly", "1:1", "projeto", "cliente", "outro"],
       tipo_timeline: [
         "criado",
         "servico_adicionado",
