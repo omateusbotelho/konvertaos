@@ -21,6 +21,7 @@ const PipelineCloser = lazy(() => import("./pages/comercial/PipelineCloser"));
 const LeadsFrios = lazy(() => import("./pages/comercial/LeadsFrios"));
 const Clientes = lazy(() => import("./pages/clientes/Clientes"));
 const ClienteDetalhes = lazy(() => import("./pages/clientes/ClienteDetalhes"));
+const Tarefas = lazy(() => import("./pages/Tarefas"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -118,6 +119,14 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <ClienteDetalhes />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/tarefas"
+                element={
+                  <ProtectedRoute>
+                    <Tarefas />
                   </ProtectedRoute>
                 }
               />
