@@ -16,30 +16,37 @@ export function AppHeader() {
         "left-0"
       )}
     >
-      <div className="flex items-center justify-between h-full px-4 lg:px-6">
-        {/* Mobile menu button */}
+      <div className="flex items-center justify-between h-full px-3 sm:px-4 lg:px-6">
+        {/* Mobile menu button - min 44px touch target */}
         <Button
           variant="ghost"
           size="icon"
-          className="lg:hidden"
+          className="lg:hidden min-w-[44px] min-h-[44px] h-11 w-11 shrink-0"
           onClick={toggleMobile}
+          aria-label="Abrir menu de navegação"
         >
           <Menu className="h-5 w-5" />
         </Button>
 
         {/* Search */}
-        <div className="hidden sm:block flex-1 max-w-md">
+        <div className="hidden sm:block flex-1 max-w-md ml-2">
           <Input
             type="search"
             placeholder="Buscar..."
+            aria-label="Campo de busca"
             icon={<Search className="h-4 w-4" />}
           />
         </div>
 
         {/* Right section */}
-        <div className="flex items-center gap-2">
-          {/* Mobile search */}
-          <Button variant="ghost" size="icon" className="sm:hidden">
+        <div className="flex items-center gap-1 sm:gap-2">
+          {/* Mobile search - min 44px touch target */}
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="sm:hidden min-w-[44px] min-h-[44px] h-11 w-11"
+            aria-label="Abrir busca"
+          >
             <Search className="h-5 w-5" />
           </Button>
 

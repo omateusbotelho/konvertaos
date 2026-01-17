@@ -12,16 +12,16 @@ function LayoutContent({ children }: AppLayoutProps) {
   const { isCollapsed } = useSidebar();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen min-h-dvh bg-background">
       <AppSidebar />
       <AppHeader />
       <main
         className={cn(
-          "pt-16 min-h-screen transition-all duration-300",
+          "pt-16 min-h-screen min-h-dvh transition-all duration-300",
           isCollapsed ? "lg:pl-16" : "lg:pl-60"
         )}
       >
-        <div className="p-4 lg:p-6">{children}</div>
+        <div className="p-3 sm:p-4 lg:p-6">{children}</div>
       </main>
     </div>
   );
