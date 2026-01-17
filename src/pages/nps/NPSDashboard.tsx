@@ -96,26 +96,25 @@ export default function NPSDashboard() {
         </KonvertaCard>
 
         <StatCard
-          title="Total de Respostas"
+          label="Total de Respostas"
           value={stats?.totalRespostas || 0}
           icon={Users}
-          description={`Taxa de resposta: ${stats?.taxaResposta || 0}%`}
           isLoading={loadingStats}
         />
 
         <StatCard
-          title="Promotores"
-          value={`${stats?.promotores || 0}`}
+          label="Promotores"
+          value={stats?.promotores || 0}
           icon={ThumbsUp}
-          description={stats?.totalRespostas ? `${Math.round((stats.promotores / stats.totalRespostas) * 100)}% do total` : '0%'}
+          variacao={stats?.totalRespostas ? Math.round((stats.promotores / stats.totalRespostas) * 100) : undefined}
           isLoading={loadingStats}
         />
 
         <StatCard
-          title="Detratores"
-          value={`${stats?.detratores || 0}`}
+          label="Detratores"
+          value={stats?.detratores || 0}
           icon={ThumbsDown}
-          description={stats?.totalRespostas ? `${Math.round((stats.detratores / stats.totalRespostas) * 100)}% do total` : '0%'}
+          variacao={stats?.totalRespostas ? -Math.round((stats.detratores / stats.totalRespostas) * 100) : undefined}
           isLoading={loadingStats}
         />
       </div>
