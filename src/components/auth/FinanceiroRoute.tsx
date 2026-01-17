@@ -25,9 +25,8 @@ export function FinanceiroRoute({ children }: FinanceiroRouteProps) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Admin or Financeiro role can access
-  const isFinanceiro = profile?.cargo === "financeiro";
-  const hasAccess = isAdmin || isFinanceiro;
+  // Admin tem acesso total; colaborador com cargo financeiro também tem acesso
+  const hasAccess = isAdmin || (profile?.cargo === "financeiro" && !isAdmin);
 
   if (!hasAccess) {
     return (
