@@ -127,24 +127,19 @@ export default function AceitarConvite() {
     }
 
     if (authData.user) {
-      // Update profile with cargo and setor - cast to match enum types
-      await supabase
-        .from("profiles")
-        .update({
-          cargo: convite.cargo as "sdr" | "closer" | "gestor_trafego" | "social_media" | "financeiro",
-          setor: convite.setor as "comercial" | "trafego" | "social_media" | "financeiro",
-        })
-        .eq("id", authData.user.id);
+      // Chamar RPC para atualizar profile e role de forma segura
+      const { error: rpcError } = await supabase.rpc("handle_invite_signup", {
+        p_user_id: authData.user.id,
+        p_cargo: convite.cargo as "sdr" | "closer" | "gestor_trafego" | "social_media" | "financeiro",
+        p_setor: convite.setor as "comercial" | "trafego" | "social_media" | "financeiro",
+        p_role: convite.role as "admin" | "colaborador",
+      });
 
-      // Update user role if admin
-      if (convite.role === "admin") {
-        await supabase
-          .from("user_roles")
-          .update({ role: "admin" })
-          .eq("user_id", authData.user.id);
+      if (rpcError) {
+        console.error("Erro ao processar convite:", rpcError);
       }
 
-      // Mark invite as used
+      // Marcar convite como usado
       await supabase
         .from("convites")
         .update({ usado: true })
