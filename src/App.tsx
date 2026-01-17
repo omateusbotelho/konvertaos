@@ -34,6 +34,9 @@ const Comissoes = lazy(() => import("./pages/financeiro/Comissoes"));
 const Custos = lazy(() => import("./pages/financeiro/Custos"));
 const Relatorios = lazy(() => import("./pages/financeiro/Relatorios"));
 const MinhasComissoes = lazy(() => import("./pages/MinhasComissoes"));
+const NPSDashboard = lazy(() => import("./pages/nps/NPSDashboard"));
+const NPSPesquisa = lazy(() => import("./pages/nps/NPSPesquisa"));
+const NPSConfig = lazy(() => import("./pages/nps/NPSConfig"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -63,11 +66,12 @@ const App = () => (
         <AuthProvider>
           <Suspense fallback={<PageLoader />}>
             <Routes>
-              {/* Auth routes (public) */}
+              {/* Public routes */}
               <Route path="/login" element={<Login />} />
               <Route path="/recuperar-senha" element={<RecuperarSenha />} />
               <Route path="/redefinir-senha" element={<RedefinirSenha />} />
               <Route path="/convite/:token" element={<AceitarConvite />} />
+              <Route path="/nps/:token" element={<NPSPesquisa />} />
 
               {/* Protected routes */}
               <Route
@@ -203,6 +207,8 @@ const App = () => (
                   </ProtectedRoute>
                 }
               />
+              <Route path="/nps" element={<FinanceiroRoute><NPSDashboard /></FinanceiroRoute>} />
+              <Route path="/configuracoes/nps" element={<FinanceiroRoute><NPSConfig /></FinanceiroRoute>} />
 
               {/* Catch-all */}
               <Route path="*" element={<NotFound />} />
