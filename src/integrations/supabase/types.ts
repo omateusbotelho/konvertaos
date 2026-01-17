@@ -2269,6 +2269,15 @@ export type Database = {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
       }
+      handle_invite_signup: {
+        Args: {
+          p_cargo: Database["public"]["Enums"]["cargo_tipo"]
+          p_role: Database["public"]["Enums"]["app_role"]
+          p_setor: Database["public"]["Enums"]["setor_tipo"]
+          p_user_id: string
+        }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
