@@ -2,8 +2,18 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { Database } from "@/integrations/supabase/types";
+import type { 
+  EmbeddedFollowUp, 
+  EmbeddedAtividade, 
+  EmbeddedOrigem, 
+  EmbeddedServico,
+  EmbeddedProfile,
+  SupabaseError,
+  LeadUpdate
+} from "@/types/supabase-helpers";
 
 type EtapaCloser = Database["public"]["Enums"]["etapa_closer"];
+type FunilTipo = Database["public"]["Enums"]["funil_tipo"];
 
 export interface LeadCloser {
   id: string;
@@ -42,6 +52,31 @@ interface UseLeadsCloserFilters {
   propostaPendente48h?: boolean;
 }
 
+// Raw lead data from Supabase query with embedded relations
+interface LeadCloserQueryResult {
+  id: string;
+  nome: string;
+  empresa: string | null;
+  telefone: string;
+  email: string | null;
+  origem_id: string | null;
+  servico_interesse_id: string | null;
+  etapa_closer: EtapaCloser | null;
+  funil_atual: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+  observacoes: string | null;
+  closer_responsavel_id: string | null;
+  sdr_responsavel_id: string | null;
+  data_agendamento: string | null;
+  valor_proposta: number | null;
+  origens_lead: EmbeddedOrigem | null;
+  servicos: EmbeddedServico | null;
+  sdr: Pick<EmbeddedProfile, 'nome'> | null;
+  follow_ups: EmbeddedFollowUp[];
+  atividades_lead: EmbeddedAtividade[];
+}
+
 const ETAPAS_CLOSER: EtapaCloser[] = [
   "reuniao_agendada",
   "reuniao_realizada",
@@ -54,7 +89,7 @@ const ETAPAS_CLOSER: EtapaCloser[] = [
 export function useLeadsCloser(filters?: UseLeadsCloserFilters) {
   const { user } = useAuth();
 
-  return useQuery({
+  return useQuery<LeadCloser[], SupabaseError>({
     queryKey: ["leads-closer", filters],
     queryFn: async (): Promise<LeadCloser[]> => {
       // Single query with resource embedding for all related data
@@ -110,36 +145,49 @@ export function useLeadsCloser(filters?: UseLeadsCloserFilters) {
       if (error) throw error;
 
       // Process embedded data to extract follow-ups and last activity
-      let result = (data || []).map((lead) => {
+      let result = ((data || []) as unknown as LeadCloserQueryResult[]).map((lead) => {
         // Get next pending follow-up (not completed, earliest date)
-        const pendingFollowUps = (lead.follow_ups as any[] || [])
-          .filter((fu: any) => !fu.concluido)
-          .sort((a: any, b: any) => 
+        const pendingFollowUps = (lead.follow_ups || [])
+          .filter((fu) => !fu.concluido)
+          .sort((a, b) => 
             new Date(a.data_programada).getTime() - new Date(b.data_programada).getTime()
           );
         
         const nextFollowUp = pendingFollowUps[0];
         
         // Get last activity date
-        const atividades = (lead.atividades_lead as any[] || [])
-          .map((a: any) => new Date(a.data_atividade))
+        const atividades = (lead.atividades_lead || [])
+          .map((a) => a.data_atividade ? new Date(a.data_atividade) : null)
+          .filter((d): d is Date => d !== null)
           .sort((a, b) => b.getTime() - a.getTime());
         
         const ultimaAtividade = atividades[0];
 
         return {
-          ...lead,
-          origem_nome: (lead.origens_lead as any)?.nome,
-          servico_nome: (lead.servicos as any)?.nome,
-          sdr_nome: (lead.sdr as any)?.nome,
+          id: lead.id,
+          nome: lead.nome,
+          empresa: lead.empresa,
+          telefone: lead.telefone,
+          email: lead.email,
+          origem_id: lead.origem_id,
+          servico_interesse_id: lead.servico_interesse_id,
+          etapa_closer: lead.etapa_closer,
+          funil_atual: lead.funil_atual,
+          created_at: lead.created_at,
+          updated_at: lead.updated_at,
+          observacoes: lead.observacoes,
+          closer_responsavel_id: lead.closer_responsavel_id,
+          sdr_responsavel_id: lead.sdr_responsavel_id,
+          data_agendamento: lead.data_agendamento,
+          valor_proposta: lead.valor_proposta,
+          origem_nome: lead.origens_lead?.nome,
+          servico_nome: lead.servicos?.nome,
+          sdr_nome: lead.sdr?.nome,
           follow_up: nextFollowUp ? {
             data: new Date(nextFollowUp.data_programada),
             descricao: nextFollowUp.descricao || undefined,
           } : undefined,
           ultima_atividade: ultimaAtividade,
-          // Clean up embedded arrays from final object
-          follow_ups: undefined,
-          atividades_lead: undefined,
         };
       });
 
@@ -162,22 +210,21 @@ export function useLeadsCloser(filters?: UseLeadsCloserFilters) {
   });
 }
 
+interface UpdateLeadEtapaCloserInput {
+  leadId: string;
+  etapa: EtapaCloser;
+}
+
 export function useUpdateLeadEtapaCloser() {
   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: async ({
-      leadId,
-      etapa,
-    }: {
-      leadId: string;
-      etapa: EtapaCloser;
-    }) => {
-      const updateData: Record<string, any> = { etapa_closer: etapa };
+  return useMutation<void, SupabaseError, UpdateLeadEtapaCloserInput>({
+    mutationFn: async ({ leadId, etapa }) => {
+      const updateData: LeadUpdate = { etapa_closer: etapa };
 
       // When moving to closer funnel, also set funil_atual
       if (etapa === "reuniao_agendada") {
-        updateData.funil_atual = "closer";
+        updateData.funil_atual = "closer" as FunilTipo;
       }
 
       const { error } = await supabase
@@ -194,7 +241,7 @@ export function useUpdateLeadEtapaCloser() {
 }
 
 export function useLeadsCloserCount() {
-  return useQuery({
+  return useQuery<number, SupabaseError>({
     queryKey: ["leads-closer-count"],
     queryFn: async () => {
       const { count, error } = await supabase
@@ -209,8 +256,15 @@ export function useLeadsCloserCount() {
   });
 }
 
+interface TodayMeeting {
+  id: string;
+  nome: string;
+  empresa: string | null;
+  data_agendamento: string | null;
+}
+
 export function useTodayMeetings() {
-  return useQuery({
+  return useQuery<TodayMeeting[], SupabaseError>({
     queryKey: ["today-meetings"],
     queryFn: async () => {
       const today = new Date();

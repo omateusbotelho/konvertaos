@@ -1,6 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import type { 
+  SupabaseError,
+  StatusCliente,
+  FormaPagamento,
+  ModeloCobranca
+} from "@/types/supabase-helpers";
 
 export interface Cliente {
   id: string;
@@ -15,11 +21,11 @@ export interface Cliente {
   estado?: string;
   cep?: string;
   fee_mensal: number;
-  modelo_cobranca: "fee" | "fee_percentual" | "avulso";
+  modelo_cobranca: ModeloCobranca;
   percentual?: number;
   dia_vencimento?: number;
-  forma_pagamento: "boleto" | "pix" | "cartao";
-  status: "ativo" | "inadimplente" | "cancelado";
+  forma_pagamento: FormaPagamento;
+  status: StatusCliente;
   data_ativacao?: string;
   data_cancelamento?: string;
   motivo_cancelamento?: string;
@@ -49,7 +55,7 @@ export interface ClienteServico {
 
 export interface UseClientesFilters {
   busca?: string;
-  status?: "ativo" | "inadimplente" | "cancelado";
+  status?: StatusCliente;
   servicoId?: string;
   responsavelId?: string;
   dataInicio?: Date;
@@ -58,10 +64,62 @@ export interface UseClientesFilters {
   feeMax?: number;
 }
 
+// Embedded types for query results
+interface EmbeddedProfileNome {
+  nome: string;
+}
+
+interface EmbeddedServicoNested {
+  nome: string;
+  setor_responsavel?: string;
+}
+
+interface EmbeddedClienteServico {
+  id: string;
+  servico_id: string;
+  responsavel_id: string;
+  valor: number;
+  data_inicio: string | null;
+  data_cancelamento: string | null;
+  status: string | null;
+  servico: EmbeddedServicoNested | null;
+  responsavel: EmbeddedProfileNome | null;
+}
+
+interface ClienteQueryResult {
+  id: string;
+  razao_social: string;
+  nome_fantasia: string | null;
+  cnpj: string | null;
+  cpf: string | null;
+  telefone: string;
+  email: string;
+  endereco: string | null;
+  cidade: string | null;
+  estado: string | null;
+  cep: string | null;
+  fee_mensal: number;
+  modelo_cobranca: ModeloCobranca | null;
+  percentual: number | null;
+  dia_vencimento: number | null;
+  forma_pagamento: FormaPagamento | null;
+  status: StatusCliente | null;
+  data_ativacao: string | null;
+  data_cancelamento: string | null;
+  motivo_cancelamento: string | null;
+  lead_id: string | null;
+  sdr_responsavel_id: string | null;
+  closer_responsavel_id: string | null;
+  created_at: string | null;
+  sdr: EmbeddedProfileNome | null;
+  closer: EmbeddedProfileNome | null;
+  cliente_servicos: EmbeddedClienteServico[] | null;
+}
+
 export function useClientes(filters: UseClientesFilters = {}) {
   const { user } = useAuth();
 
-  return useQuery({
+  return useQuery<Cliente[], SupabaseError>({
     queryKey: ["clientes", filters],
     queryFn: async () => {
       let query = supabase
@@ -113,19 +171,42 @@ export function useClientes(filters: UseClientesFilters = {}) {
       const { data, error } = await query;
       if (error) throw error;
 
-      return data.map((cliente): Cliente => ({
-        ...cliente,
+      return (data as ClienteQueryResult[]).map((cliente): Cliente => ({
+        id: cliente.id,
+        razao_social: cliente.razao_social,
+        nome_fantasia: cliente.nome_fantasia || undefined,
+        cnpj: cliente.cnpj || undefined,
+        cpf: cliente.cpf || undefined,
+        telefone: cliente.telefone,
+        email: cliente.email,
+        endereco: cliente.endereco || undefined,
+        cidade: cliente.cidade || undefined,
+        estado: cliente.estado || undefined,
+        cep: cliente.cep || undefined,
+        fee_mensal: cliente.fee_mensal,
+        modelo_cobranca: cliente.modelo_cobranca || "fee",
+        percentual: cliente.percentual || undefined,
+        dia_vencimento: cliente.dia_vencimento || undefined,
+        forma_pagamento: cliente.forma_pagamento || "pix",
+        status: cliente.status || "ativo",
+        data_ativacao: cliente.data_ativacao || undefined,
+        data_cancelamento: cliente.data_cancelamento || undefined,
+        motivo_cancelamento: cliente.motivo_cancelamento || undefined,
+        lead_id: cliente.lead_id || undefined,
+        sdr_responsavel_id: cliente.sdr_responsavel_id || undefined,
+        closer_responsavel_id: cliente.closer_responsavel_id || undefined,
+        created_at: cliente.created_at || undefined,
         sdr_nome: cliente.sdr?.nome,
         closer_nome: cliente.closer?.nome,
-        servicos: cliente.cliente_servicos?.map((cs: any) => ({
+        servicos: cliente.cliente_servicos?.map((cs) => ({
           id: cs.id,
           cliente_id: cliente.id,
           servico_id: cs.servico_id,
           responsavel_id: cs.responsavel_id,
           valor: cs.valor,
-          data_inicio: cs.data_inicio,
-          data_cancelamento: cs.data_cancelamento,
-          status: cs.status,
+          data_inicio: cs.data_inicio || undefined,
+          data_cancelamento: cs.data_cancelamento || undefined,
+          status: cs.status || undefined,
           servico_nome: cs.servico?.nome,
           responsavel_nome: cs.responsavel?.nome,
         })) || [],
@@ -162,13 +243,22 @@ export function useCliente(id: string) {
 
       if (error) throw error;
 
+      const cliente = data as ClienteQueryResult & {
+        sdr: { id: string; nome: string; email: string } | null;
+        closer: { id: string; nome: string; email: string } | null;
+        cliente_servicos: (EmbeddedClienteServico & {
+          servico: { id: string; nome: string; setor_responsavel: string } | null;
+          responsavel: { id: string; nome: string } | null;
+        })[] | null;
+      };
+
       return {
-        ...data,
-        sdr_nome: data.sdr?.nome,
-        closer_nome: data.closer?.nome,
-        servicos: data.cliente_servicos?.map((cs: any) => ({
+        ...cliente,
+        sdr_nome: cliente.sdr?.nome,
+        closer_nome: cliente.closer?.nome,
+        servicos: cliente.cliente_servicos?.map((cs) => ({
           id: cs.id,
-          cliente_id: data.id,
+          cliente_id: cliente.id,
           servico_id: cs.servico_id,
           responsavel_id: cs.responsavel_id,
           valor: cs.valor,
@@ -185,8 +275,15 @@ export function useCliente(id: string) {
   });
 }
 
+interface ClientesStats {
+  totalAtivos: number;
+  mrr: number;
+  inadimplentes: number;
+  novosEsteMes: number;
+}
+
 export function useClientesStats() {
-  return useQuery({
+  return useQuery<ClientesStats, SupabaseError>({
     queryKey: ["clientes-stats"],
     queryFn: async () => {
       const now = new Date();
@@ -275,17 +372,16 @@ export function useClienteArquivos(clienteId: string) {
   });
 }
 
+interface CancelarClienteInput {
+  clienteId: string;
+  motivo: string;
+}
+
 export function useCancelarCliente() {
   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: async ({
-      clienteId,
-      motivo,
-    }: {
-      clienteId: string;
-      motivo: string;
-    }) => {
+  return useMutation<void, SupabaseError, CancelarClienteInput>({
+    mutationFn: async ({ clienteId, motivo }) => {
       // Update client status
       const { error } = await supabase
         .from("clientes")
@@ -315,16 +411,18 @@ export function useCancelarCliente() {
   });
 }
 
+interface AddClienteServicoInput {
+  cliente_id: string;
+  servico_id: string;
+  responsavel_id: string;
+  valor: number;
+}
+
 export function useAddClienteServico() {
   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: async (data: {
-      cliente_id: string;
-      servico_id: string;
-      responsavel_id: string;
-      valor: number;
-    }) => {
+  return useMutation<void, SupabaseError, AddClienteServicoInput>({
+    mutationFn: async (data) => {
       const { error } = await supabase.from("cliente_servicos").insert({
         ...data,
         status: "ativo",
@@ -354,17 +452,16 @@ export function useAddClienteServico() {
   });
 }
 
+interface CancelarServicoInput {
+  servicoId: string;
+  clienteId: string;
+}
+
 export function useCancelarServico() {
   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: async ({
-      servicoId,
-      clienteId,
-    }: {
-      servicoId: string;
-      clienteId: string;
-    }) => {
+  return useMutation<void, SupabaseError, CancelarServicoInput>({
+    mutationFn: async ({ servicoId, clienteId }) => {
       const { error } = await supabase
         .from("cliente_servicos")
         .update({
@@ -396,18 +493,20 @@ export function useCancelarServico() {
   });
 }
 
+interface AddClienteAcessoInput {
+  cliente_id: string;
+  tipo: string;
+  usuario?: string;
+  senha?: string;
+  url?: string;
+  observacoes?: string;
+}
+
 export function useAddClienteAcesso() {
   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: async (data: {
-      cliente_id: string;
-      tipo: string;
-      usuario?: string;
-      senha?: string;
-      url?: string;
-      observacoes?: string;
-    }) => {
+  return useMutation<void, SupabaseError, AddClienteAcessoInput>({
+    mutationFn: async (data) => {
       const { error } = await supabase.from("cliente_acessos").insert(data);
       if (error) throw error;
     },
@@ -420,8 +519,8 @@ export function useAddClienteAcesso() {
 export function useDeleteClienteAcesso() {
   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: async (acessoId: string) => {
+  return useMutation<void, SupabaseError, string>({
+    mutationFn: async (acessoId) => {
       const { error } = await supabase
         .from("cliente_acessos")
         .delete()
