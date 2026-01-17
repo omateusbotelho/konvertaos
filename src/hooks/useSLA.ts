@@ -15,6 +15,89 @@ export interface SLAConfig {
   cliente?: { razao_social: string; nome_fantasia: string | null } | null;
 }
 
+// Hook para buscar o SLA aplicável com fallback para SLA Padrão
+export function useSLAForContext(servicoId?: string | null, clienteId?: string | null) {
+  return useQuery({
+    queryKey: ['sla-for-context', servicoId, clienteId],
+    queryFn: async (): Promise<SLAConfig | null> => {
+      // 1. Primeiro, tenta encontrar SLA específico do cliente
+      if (clienteId) {
+        const { data: clienteSLA, error: clienteError } = await supabase
+          .from('sla_config')
+          .select(`
+            *,
+            servico:servicos(nome),
+            cliente:clientes(razao_social, nome_fantasia)
+          `)
+          .eq('cliente_id', clienteId)
+          .eq('ativo', true)
+          .maybeSingle();
+
+        if (clienteError) throw clienteError;
+        if (clienteSLA) return clienteSLA as SLAConfig;
+      }
+
+      // 2. Se não encontrou, tenta SLA do serviço
+      if (servicoId) {
+        const { data: servicoSLA, error: servicoError } = await supabase
+          .from('sla_config')
+          .select(`
+            *,
+            servico:servicos(nome),
+            cliente:clientes(razao_social, nome_fantasia)
+          `)
+          .eq('servico_id', servicoId)
+          .is('cliente_id', null)
+          .eq('ativo', true)
+          .maybeSingle();
+
+        if (servicoError) throw servicoError;
+        if (servicoSLA) return servicoSLA as SLAConfig;
+      }
+
+      // 3. Fallback para SLA Padrão (ambos nulos)
+      const { data: defaultSLA, error: defaultError } = await supabase
+        .from('sla_config')
+        .select(`
+          *,
+          servico:servicos(nome),
+          cliente:clientes(razao_social, nome_fantasia)
+        `)
+        .is('servico_id', null)
+        .is('cliente_id', null)
+        .eq('ativo', true)
+        .maybeSingle();
+
+      if (defaultError) throw defaultError;
+      return defaultSLA as SLAConfig | null;
+    },
+    enabled: true
+  });
+}
+
+// Hook para buscar SLA Padrão
+export function useSLAPadrao() {
+  return useQuery({
+    queryKey: ['sla-padrao'],
+    queryFn: async (): Promise<SLAConfig | null> => {
+      const { data, error } = await supabase
+        .from('sla_config')
+        .select(`
+          *,
+          servico:servicos(nome),
+          cliente:clientes(razao_social, nome_fantasia)
+        `)
+        .is('servico_id', null)
+        .is('cliente_id', null)
+        .eq('ativo', true)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data as SLAConfig | null;
+    }
+  });
+}
+
 export function useSLAConfigs() {
   return useQuery({
     queryKey: ['sla-configs'],
