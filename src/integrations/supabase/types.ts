@@ -418,6 +418,36 @@ export type Database = {
           },
         ]
       }
+      etapas_kanban: {
+        Row: {
+          cor: string | null
+          created_at: string | null
+          id: string
+          is_default: boolean | null
+          is_done: boolean | null
+          nome: string
+          ordem: number
+        }
+        Insert: {
+          cor?: string | null
+          created_at?: string | null
+          id?: string
+          is_default?: boolean | null
+          is_done?: boolean | null
+          nome: string
+          ordem: number
+        }
+        Update: {
+          cor?: string | null
+          created_at?: string | null
+          id?: string
+          is_default?: boolean | null
+          is_done?: boolean | null
+          nome?: string
+          ordem?: number
+        }
+        Relationships: []
+      }
       follow_ups: {
         Row: {
           concluido: boolean | null
@@ -655,6 +685,70 @@ export type Database = {
         }
         Relationships: []
       }
+      projetos: {
+        Row: {
+          cliente_id: string
+          cliente_servico_id: string | null
+          created_at: string | null
+          data_conclusao: string | null
+          data_inicio: string | null
+          descricao: string | null
+          id: string
+          nome: string
+          responsavel_principal_id: string | null
+          status: Database["public"]["Enums"]["status_projeto"] | null
+          updated_at: string | null
+        }
+        Insert: {
+          cliente_id: string
+          cliente_servico_id?: string | null
+          created_at?: string | null
+          data_conclusao?: string | null
+          data_inicio?: string | null
+          descricao?: string | null
+          id?: string
+          nome: string
+          responsavel_principal_id?: string | null
+          status?: Database["public"]["Enums"]["status_projeto"] | null
+          updated_at?: string | null
+        }
+        Update: {
+          cliente_id?: string
+          cliente_servico_id?: string | null
+          created_at?: string | null
+          data_conclusao?: string | null
+          data_inicio?: string | null
+          descricao?: string | null
+          id?: string
+          nome?: string
+          responsavel_principal_id?: string | null
+          status?: Database["public"]["Enums"]["status_projeto"] | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projetos_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projetos_cliente_servico_id_fkey"
+            columns: ["cliente_servico_id"]
+            isOneToOne: false
+            referencedRelation: "cliente_servicos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projetos_responsavel_principal_id_fkey"
+            columns: ["responsavel_principal_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       servicos: {
         Row: {
           ativo: boolean | null
@@ -681,6 +775,407 @@ export type Database = {
           setor_responsavel?: string
         }
         Relationships: []
+      }
+      tarefa_anexos: {
+        Row: {
+          created_at: string | null
+          id: string
+          nome: string
+          tamanho: number | null
+          tarefa_id: string
+          tipo: string | null
+          uploaded_por_id: string | null
+          url: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          nome: string
+          tamanho?: number | null
+          tarefa_id: string
+          tipo?: string | null
+          uploaded_por_id?: string | null
+          url: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          nome?: string
+          tamanho?: number | null
+          tarefa_id?: string
+          tipo?: string | null
+          uploaded_por_id?: string | null
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tarefa_anexos_tarefa_id_fkey"
+            columns: ["tarefa_id"]
+            isOneToOne: false
+            referencedRelation: "tarefas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tarefa_anexos_uploaded_por_id_fkey"
+            columns: ["uploaded_por_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tarefa_comentario_anexos: {
+        Row: {
+          comentario_id: string
+          created_at: string | null
+          id: string
+          nome: string
+          tamanho: number | null
+          tipo: string | null
+          url: string
+        }
+        Insert: {
+          comentario_id: string
+          created_at?: string | null
+          id?: string
+          nome: string
+          tamanho?: number | null
+          tipo?: string | null
+          url: string
+        }
+        Update: {
+          comentario_id?: string
+          created_at?: string | null
+          id?: string
+          nome?: string
+          tamanho?: number | null
+          tipo?: string | null
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tarefa_comentario_anexos_comentario_id_fkey"
+            columns: ["comentario_id"]
+            isOneToOne: false
+            referencedRelation: "tarefa_comentarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tarefa_comentarios: {
+        Row: {
+          autor_id: string
+          conteudo: string
+          created_at: string | null
+          id: string
+          tarefa_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          autor_id: string
+          conteudo: string
+          created_at?: string | null
+          id?: string
+          tarefa_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          autor_id?: string
+          conteudo?: string
+          created_at?: string | null
+          id?: string
+          tarefa_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tarefa_comentarios_autor_id_fkey"
+            columns: ["autor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tarefa_comentarios_tarefa_id_fkey"
+            columns: ["tarefa_id"]
+            isOneToOne: false
+            referencedRelation: "tarefas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tarefa_historico: {
+        Row: {
+          created_at: string | null
+          dados_anteriores: Json | null
+          dados_novos: Json | null
+          descricao: string
+          id: string
+          realizado_por_id: string
+          tarefa_id: string
+          tipo: Database["public"]["Enums"]["tipo_historico_tarefa"]
+        }
+        Insert: {
+          created_at?: string | null
+          dados_anteriores?: Json | null
+          dados_novos?: Json | null
+          descricao: string
+          id?: string
+          realizado_por_id: string
+          tarefa_id: string
+          tipo: Database["public"]["Enums"]["tipo_historico_tarefa"]
+        }
+        Update: {
+          created_at?: string | null
+          dados_anteriores?: Json | null
+          dados_novos?: Json | null
+          descricao?: string
+          id?: string
+          realizado_por_id?: string
+          tarefa_id?: string
+          tipo?: Database["public"]["Enums"]["tipo_historico_tarefa"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tarefa_historico_realizado_por_id_fkey"
+            columns: ["realizado_por_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tarefa_historico_tarefa_id_fkey"
+            columns: ["tarefa_id"]
+            isOneToOne: false
+            referencedRelation: "tarefas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tarefa_mencoes: {
+        Row: {
+          comentario_id: string
+          created_at: string | null
+          id: string
+          usuario_mencionado_id: string
+        }
+        Insert: {
+          comentario_id: string
+          created_at?: string | null
+          id?: string
+          usuario_mencionado_id: string
+        }
+        Update: {
+          comentario_id?: string
+          created_at?: string | null
+          id?: string
+          usuario_mencionado_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tarefa_mencoes_comentario_id_fkey"
+            columns: ["comentario_id"]
+            isOneToOne: false
+            referencedRelation: "tarefa_comentarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tarefa_mencoes_usuario_mencionado_id_fkey"
+            columns: ["usuario_mencionado_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tarefas: {
+        Row: {
+          cliente_id: string
+          concluida: boolean | null
+          concluida_em: string | null
+          concluida_por_id: string | null
+          created_at: string | null
+          created_by_id: string
+          data_vencimento: string | null
+          descricao: string | null
+          etapa_id: string
+          id: string
+          ordem: number | null
+          prioridade: Database["public"]["Enums"]["prioridade_tarefa"] | null
+          projeto_id: string
+          recorrencia_config: Json | null
+          recorrente: boolean | null
+          responsavel_id: string | null
+          tarefa_pai_id: string | null
+          titulo: string
+          updated_at: string | null
+        }
+        Insert: {
+          cliente_id: string
+          concluida?: boolean | null
+          concluida_em?: string | null
+          concluida_por_id?: string | null
+          created_at?: string | null
+          created_by_id: string
+          data_vencimento?: string | null
+          descricao?: string | null
+          etapa_id: string
+          id?: string
+          ordem?: number | null
+          prioridade?: Database["public"]["Enums"]["prioridade_tarefa"] | null
+          projeto_id: string
+          recorrencia_config?: Json | null
+          recorrente?: boolean | null
+          responsavel_id?: string | null
+          tarefa_pai_id?: string | null
+          titulo: string
+          updated_at?: string | null
+        }
+        Update: {
+          cliente_id?: string
+          concluida?: boolean | null
+          concluida_em?: string | null
+          concluida_por_id?: string | null
+          created_at?: string | null
+          created_by_id?: string
+          data_vencimento?: string | null
+          descricao?: string | null
+          etapa_id?: string
+          id?: string
+          ordem?: number | null
+          prioridade?: Database["public"]["Enums"]["prioridade_tarefa"] | null
+          projeto_id?: string
+          recorrencia_config?: Json | null
+          recorrente?: boolean | null
+          responsavel_id?: string | null
+          tarefa_pai_id?: string | null
+          titulo?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tarefas_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tarefas_concluida_por_id_fkey"
+            columns: ["concluida_por_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tarefas_created_by_id_fkey"
+            columns: ["created_by_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tarefas_etapa_id_fkey"
+            columns: ["etapa_id"]
+            isOneToOne: false
+            referencedRelation: "etapas_kanban"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tarefas_projeto_id_fkey"
+            columns: ["projeto_id"]
+            isOneToOne: false
+            referencedRelation: "projetos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tarefas_responsavel_id_fkey"
+            columns: ["responsavel_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tarefas_tarefa_pai_id_fkey"
+            columns: ["tarefa_pai_id"]
+            isOneToOne: false
+            referencedRelation: "tarefas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      template_onboarding_tarefas: {
+        Row: {
+          created_at: string | null
+          descricao: string | null
+          id: string
+          ordem: number
+          prazo_dias: number | null
+          setor_responsavel: string | null
+          template_id: string
+          titulo: string
+        }
+        Insert: {
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          ordem: number
+          prazo_dias?: number | null
+          setor_responsavel?: string | null
+          template_id: string
+          titulo: string
+        }
+        Update: {
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          ordem?: number
+          prazo_dias?: number | null
+          setor_responsavel?: string | null
+          template_id?: string
+          titulo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "template_onboarding_tarefas_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "templates_onboarding"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      templates_onboarding: {
+        Row: {
+          ativo: boolean | null
+          created_at: string | null
+          id: string
+          nome: string
+          servico_id: string
+        }
+        Insert: {
+          ativo?: boolean | null
+          created_at?: string | null
+          id?: string
+          nome: string
+          servico_id: string
+        }
+        Update: {
+          ativo?: boolean | null
+          created_at?: string | null
+          id?: string
+          nome?: string
+          servico_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "templates_onboarding_servico_id_fkey"
+            columns: ["servico_id"]
+            isOneToOne: false
+            referencedRelation: "servicos"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -754,9 +1249,20 @@ export type Database = {
         | "indicacao"
         | "ligacao"
         | "outro"
+      prioridade_tarefa: "baixa" | "media" | "alta" | "urgente"
       setor_tipo: "comercial" | "trafego" | "social_media" | "financeiro"
       status_cliente: "ativo" | "inadimplente" | "cancelado"
+      status_projeto: "ativo" | "pausado" | "concluido" | "cancelado"
       tipo_arquivo: "contrato" | "briefing" | "documento" | "outro"
+      tipo_historico_tarefa:
+        | "criada"
+        | "etapa_alterada"
+        | "responsavel_alterado"
+        | "prioridade_alterada"
+        | "prazo_alterado"
+        | "concluida"
+        | "reaberta"
+        | "editada"
       tipo_timeline:
         | "criado"
         | "servico_adicionado"
@@ -934,9 +1440,21 @@ export const Constants = {
         "ligacao",
         "outro",
       ],
+      prioridade_tarefa: ["baixa", "media", "alta", "urgente"],
       setor_tipo: ["comercial", "trafego", "social_media", "financeiro"],
       status_cliente: ["ativo", "inadimplente", "cancelado"],
+      status_projeto: ["ativo", "pausado", "concluido", "cancelado"],
       tipo_arquivo: ["contrato", "briefing", "documento", "outro"],
+      tipo_historico_tarefa: [
+        "criada",
+        "etapa_alterada",
+        "responsavel_alterado",
+        "prioridade_alterada",
+        "prazo_alterado",
+        "concluida",
+        "reaberta",
+        "editada",
+      ],
       tipo_timeline: [
         "criado",
         "servico_adicionado",
