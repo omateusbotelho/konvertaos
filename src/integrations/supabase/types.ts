@@ -2254,6 +2254,17 @@ export type Database = {
       }
     }
     Functions: {
+      busca_global: {
+        Args: { p_limite?: number; p_termo: string }
+        Returns: {
+          id: string
+          link: string
+          relevancia: number
+          subtitulo: string
+          tipo: string
+          titulo: string
+        }[]
+      }
       criar_notificacao: {
         Args: {
           p_dados?: Json
