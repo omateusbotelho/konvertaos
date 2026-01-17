@@ -17,6 +17,7 @@ const AceitarConvite = lazy(() => import("./pages/auth/AceitarConvite"));
 const Equipe = lazy(() => import("./pages/Equipe"));
 const Perfil = lazy(() => import("./pages/Perfil"));
 const PipelineSDR = lazy(() => import("./pages/comercial/PipelineSDR"));
+const PipelineCloser = lazy(() => import("./pages/comercial/PipelineCloser"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -82,6 +83,14 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <PipelineSDR />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/comercial/closer"
+                element={
+                  <ProtectedRoute>
+                    <PipelineCloser />
                   </ProtectedRoute>
                 }
               />
