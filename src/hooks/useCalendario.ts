@@ -232,12 +232,13 @@ export function useCreateReuniao() {
       recorrente?: boolean;
       participantes: string[];
     }) => {
-      const { participantes, ...reuniaoData } = dados;
+      const { participantes, tipo, ...reuniaoData } = dados;
 
       const { data: reuniao, error: reuniaoError } = await supabase
         .from('reunioes')
         .insert({
           ...reuniaoData,
+          tipo: tipo as 'weekly' | '1:1' | 'projeto' | 'cliente' | 'outro',
           organizador_id: user!.id,
         })
         .select()
