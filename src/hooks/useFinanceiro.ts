@@ -87,7 +87,13 @@ export interface ResumoFinanceiro {
   despesa: number;
   lucro: number;
   inadimplencia: number;
+  taxaInadimplencia: number;
   clientesInadimplentes: number;
+  totalCustosFixos: number;
+  totalCustosVariaveis: number;
+  cobrancasNoPeriodo: number;
+  cobrancasPagas: number;
+  cobrancasAtrasadas: number;
 }
 
 // Fetch Cobrancas
@@ -245,65 +251,51 @@ export function useCustosVariaveis(filters?: { mes?: number; ano?: number; clien
   });
 }
 
-// Resumo Financeiro do Período
+// Resumo Financeiro do Período - Using optimized RPC
 export function useResumoFinanceiro(mes: number, ano: number) {
   return useQuery({
     queryKey: ["resumo-financeiro", mes, ano],
     queryFn: async () => {
-      const startDate = new Date(ano, mes - 1, 1);
-      const endDate = new Date(ano, mes, 0);
-      const startStr = startDate.toISOString().split("T")[0];
-      const endStr = endDate.toISOString().split("T")[0];
+      const { data, error } = await supabase.rpc("get_financeiro_summary", {
+        mes_ref: mes,
+        ano_ref: ano,
+      });
 
-      // Get paid cobrancas (receita)
-      const { data: cobrancasPagas } = await supabase
-        .from("cobrancas")
-        .select("valor")
-        .eq("status", "pago")
-        .gte("data_pagamento", startStr)
-        .lte("data_pagamento", endStr);
+      if (error) throw error;
 
-      const receita = cobrancasPagas?.reduce((sum, c) => sum + Number(c.valor), 0) || 0;
-
-      // Get custos fixos ativos
-      const { data: custosFixos } = await supabase
-        .from("custos_fixos")
-        .select("valor")
-        .eq("ativo", true);
-
-      const totalCustosFixos = custosFixos?.reduce((sum, c) => sum + Number(c.valor), 0) || 0;
-
-      // Get custos variáveis do período
-      const { data: custosVariaveis } = await supabase
-        .from("custos_variaveis")
-        .select("valor")
-        .gte("data_referencia", startStr)
-        .lte("data_referencia", endStr);
-
-      const totalCustosVariaveis = custosVariaveis?.reduce((sum, c) => sum + Number(c.valor), 0) || 0;
-
-      // Get inadimplência do período (cobranças vencidas no período com status atrasado ou falhou)
-      const { data: cobrancasInadimplentes } = await supabase
-        .from("cobrancas")
-        .select("valor, cliente_id")
-        .in("status", ["atrasado", "falhou"])
-        .gte("data_vencimento", startStr)
-        .lte("data_vencimento", endStr);
-
-      const inadimplencia = cobrancasInadimplentes?.reduce((sum, c) => sum + Number(c.valor), 0) || 0;
-      const clientesInadimplentes = new Set(cobrancasInadimplentes?.map(c => c.cliente_id)).size;
-
-      const despesa = totalCustosFixos + totalCustosVariaveis;
-      const lucro = receita - despesa;
+      const result = data?.[0];
+      
+      if (!result) {
+        return {
+          receita: 0,
+          despesa: 0,
+          lucro: 0,
+          inadimplencia: 0,
+          taxaInadimplencia: 0,
+          clientesInadimplentes: 0,
+          totalCustosFixos: 0,
+          totalCustosVariaveis: 0,
+          cobrancasNoPeriodo: 0,
+          cobrancasPagas: 0,
+          cobrancasAtrasadas: 0,
+        } as ResumoFinanceiro;
+      }
 
       return {
-        receita,
-        despesa,
-        lucro,
-        inadimplencia,
-        clientesInadimplentes,
+        receita: Number(result.receita) || 0,
+        despesa: Number(result.despesa) || 0,
+        lucro: Number(result.lucro) || 0,
+        inadimplencia: Number(result.inadimplencia) || 0,
+        taxaInadimplencia: Number(result.taxa_inadimplencia) || 0,
+        clientesInadimplentes: Number(result.clientes_inadimplentes) || 0,
+        totalCustosFixos: Number(result.total_custos_fixos) || 0,
+        totalCustosVariaveis: Number(result.total_custos_variaveis) || 0,
+        cobrancasNoPeriodo: Number(result.cobrancas_no_periodo) || 0,
+        cobrancasPagas: Number(result.cobrancas_pagas) || 0,
+        cobrancasAtrasadas: Number(result.cobrancas_atrasadas) || 0,
       } as ResumoFinanceiro;
     },
+    staleTime: 2 * 60 * 1000,
   });
 }
 

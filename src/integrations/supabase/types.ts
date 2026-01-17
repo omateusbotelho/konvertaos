@@ -2265,6 +2265,22 @@ export type Database = {
         }
         Returns: string
       }
+      get_financeiro_summary: {
+        Args: { ano_ref: number; mes_ref: number }
+        Returns: {
+          clientes_inadimplentes: number
+          cobrancas_atrasadas: number
+          cobrancas_no_periodo: number
+          cobrancas_pagas: number
+          despesa: number
+          inadimplencia: number
+          lucro: number
+          receita: number
+          taxa_inadimplencia: number
+          total_custos_fixos: number
+          total_custos_variaveis: number
+        }[]
+      }
       get_leads_followups_and_activities: {
         Args: { p_lead_ids: string[] }
         Returns: {
