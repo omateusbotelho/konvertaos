@@ -81,11 +81,18 @@ function ProgressWidgetSkeleton({ title }: { title: string }) {
         <KonvertaCardTitle>{title}</KonvertaCardTitle>
       </KonvertaCardHeader>
       <div className="flex-1 flex flex-col justify-center space-y-4">
-        <div className="text-center">
-          <Skeleton className="h-9 w-24 mx-auto mb-2" />
-          <Skeleton className="h-4 w-32 mx-auto" />
+        <div className="text-center space-y-2">
+          <Skeleton className="h-9 w-28 mx-auto" />
+          <Skeleton className="h-4 w-36 mx-auto" />
         </div>
-        <Skeleton className="h-3 w-full" />
+        <div className="space-y-2">
+          <Skeleton className="h-3 w-full rounded-full" />
+          <div className="flex justify-between">
+            <Skeleton className="h-3 w-6" />
+            <Skeleton className="h-3 w-8" />
+            <Skeleton className="h-3 w-8" />
+          </div>
+        </div>
       </div>
     </KonvertaCard>
   );
