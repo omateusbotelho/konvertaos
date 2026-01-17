@@ -59,6 +59,53 @@ export type Database = {
           },
         ]
       }
+      audit_log: {
+        Row: {
+          acao: string
+          created_at: string | null
+          dados_anteriores: Json | null
+          dados_novos: Json | null
+          entidade: string
+          entidade_id: string | null
+          id: string
+          ip_address: string | null
+          user_agent: string | null
+          usuario_id: string | null
+        }
+        Insert: {
+          acao: string
+          created_at?: string | null
+          dados_anteriores?: Json | null
+          dados_novos?: Json | null
+          entidade: string
+          entidade_id?: string | null
+          id?: string
+          ip_address?: string | null
+          user_agent?: string | null
+          usuario_id?: string | null
+        }
+        Update: {
+          acao?: string
+          created_at?: string | null
+          dados_anteriores?: Json | null
+          dados_novos?: Json | null
+          entidade?: string
+          entidade_id?: string | null
+          id?: string
+          ip_address?: string | null
+          user_agent?: string | null
+          usuario_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_log_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ausencias: {
         Row: {
           aprovado_em: string | null
@@ -659,6 +706,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      configuracoes_agencia: {
+        Row: {
+          cnpj: string | null
+          cor_principal: string | null
+          created_at: string | null
+          endereco: string | null
+          favicon_url: string | null
+          fuso_horario: string | null
+          id: string
+          logo_url: string | null
+          moeda: string | null
+          nome_agencia: string
+          razao_social: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          cnpj?: string | null
+          cor_principal?: string | null
+          created_at?: string | null
+          endereco?: string | null
+          favicon_url?: string | null
+          fuso_horario?: string | null
+          id?: string
+          logo_url?: string | null
+          moeda?: string | null
+          nome_agencia?: string
+          razao_social?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          cnpj?: string | null
+          cor_principal?: string | null
+          created_at?: string | null
+          endereco?: string | null
+          favicon_url?: string | null
+          fuso_horario?: string | null
+          id?: string
+          logo_url?: string | null
+          moeda?: string | null
+          nome_agencia?: string
+          razao_social?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       convites: {
         Row: {
@@ -1646,6 +1738,61 @@ export type Database = {
           setor_responsavel?: string
         }
         Relationships: []
+      }
+      sla_config: {
+        Row: {
+          ativo: boolean | null
+          cliente_id: string | null
+          created_at: string | null
+          id: string
+          nome: string
+          servico_id: string | null
+          tempo_horas: number
+          updated_at: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          cliente_id?: string | null
+          created_at?: string | null
+          id?: string
+          nome: string
+          servico_id?: string | null
+          tempo_horas: number
+          updated_at?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          cliente_id?: string | null
+          created_at?: string | null
+          id?: string
+          nome?: string
+          servico_id?: string | null
+          tempo_horas?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sla_config_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sla_config_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "margem_por_cliente"
+            referencedColumns: ["cliente_id"]
+          },
+          {
+            foreignKeyName: "sla_config_servico_id_fkey"
+            columns: ["servico_id"]
+            isOneToOne: false
+            referencedRelation: "servicos"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tarefa_anexos: {
         Row: {
