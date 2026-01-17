@@ -1,61 +1,45 @@
 import { ReactNode, useState } from "react";
+import { useDroppable } from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { cn } from "@/lib/utils";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface KanbanColumnProps {
+  id: string;
   title: string;
   count: number;
   color: string;
   children: ReactNode;
+  itemIds: string[];
   isCollapsible?: boolean;
   defaultCollapsed?: boolean;
-  onDrop?: (leadId: string) => void;
 }
 
 export function KanbanColumn({
+  id,
   title,
   count,
   color,
   children,
+  itemIds,
   isCollapsible = false,
   defaultCollapsed = false,
-  onDrop,
 }: KanbanColumnProps) {
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
-  const [isDragOver, setIsDragOver] = useState(false);
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(true);
-  };
-
-  const handleDragLeave = () => {
-    setIsDragOver(false);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(false);
-    const leadId = e.dataTransfer.getData("leadId");
-    if (leadId && onDrop) {
-      onDrop(leadId);
-    }
-  };
+  const { isOver, setNodeRef } = useDroppable({ id });
 
   if (isCollapsible && isCollapsed) {
     return (
       <div
+        ref={setNodeRef}
         className="flex-shrink-0 w-[280px] lg:w-[300px]"
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
       >
         <button
           onClick={() => setIsCollapsed(false)}
           className={cn(
             "w-full flex items-center gap-2 p-3 rounded-lg bg-card border border-border/20 hover:bg-card/80 transition-colors",
-            isDragOver && "ring-2 ring-primary"
+            isOver && "ring-2 ring-primary"
           )}
         >
           <div
@@ -72,13 +56,11 @@ export function KanbanColumn({
 
   return (
     <div
+      ref={setNodeRef}
       className={cn(
         "flex-shrink-0 w-[280px] lg:w-[300px] flex flex-col bg-card/50 rounded-lg border border-border/20 max-h-[calc(100vh-280px)]",
-        isDragOver && "ring-2 ring-primary"
+        isOver && "ring-2 ring-primary bg-primary/5"
       )}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
     >
       {/* Column Header */}
       <div className="flex items-center gap-2 p-3 border-b border-border/20">
@@ -102,14 +84,16 @@ export function KanbanColumn({
 
       {/* Column Content */}
       <ScrollArea className="flex-1 p-2">
-        <div className="flex flex-col gap-2 min-h-[100px]">
-          {children}
-          {isDragOver && (
-            <div className="h-[120px] border-2 border-dashed border-primary/50 rounded-lg flex items-center justify-center text-sm text-muted-foreground">
-              Soltar aqui
-            </div>
-          )}
-        </div>
+        <SortableContext items={itemIds} strategy={verticalListSortingStrategy}>
+          <div className="flex flex-col gap-2 min-h-[100px]">
+            {children}
+            {isOver && (
+              <div className="h-[120px] border-2 border-dashed border-primary/50 rounded-lg flex items-center justify-center text-sm text-muted-foreground animate-pulse">
+                Soltar aqui
+              </div>
+            )}
+          </div>
+        </SortableContext>
       </ScrollArea>
     </div>
   );
