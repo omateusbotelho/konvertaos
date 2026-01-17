@@ -18,6 +18,7 @@ const Equipe = lazy(() => import("./pages/Equipe"));
 const Perfil = lazy(() => import("./pages/Perfil"));
 const PipelineSDR = lazy(() => import("./pages/comercial/PipelineSDR"));
 const PipelineCloser = lazy(() => import("./pages/comercial/PipelineCloser"));
+const LeadsFrios = lazy(() => import("./pages/comercial/LeadsFrios"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -91,6 +92,14 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <PipelineCloser />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/comercial/leads-frios"
+                element={
+                  <ProtectedRoute>
+                    <LeadsFrios />
                   </ProtectedRoute>
                 }
               />
