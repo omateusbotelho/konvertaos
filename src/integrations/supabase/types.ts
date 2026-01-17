@@ -14,16 +14,139 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      convites: {
+        Row: {
+          cargo: Database["public"]["Enums"]["cargo_tipo"]
+          convidado_por: string | null
+          created_at: string | null
+          email: string
+          expires_at: string
+          id: string
+          nome: string
+          role: Database["public"]["Enums"]["app_role"] | null
+          setor: Database["public"]["Enums"]["setor_tipo"]
+          token: string
+          usado: boolean | null
+        }
+        Insert: {
+          cargo: Database["public"]["Enums"]["cargo_tipo"]
+          convidado_por?: string | null
+          created_at?: string | null
+          email: string
+          expires_at: string
+          id?: string
+          nome: string
+          role?: Database["public"]["Enums"]["app_role"] | null
+          setor: Database["public"]["Enums"]["setor_tipo"]
+          token: string
+          usado?: boolean | null
+        }
+        Update: {
+          cargo?: Database["public"]["Enums"]["cargo_tipo"]
+          convidado_por?: string | null
+          created_at?: string | null
+          email?: string
+          expires_at?: string
+          id?: string
+          nome?: string
+          role?: Database["public"]["Enums"]["app_role"] | null
+          setor?: Database["public"]["Enums"]["setor_tipo"]
+          token?: string
+          usado?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "convites_convidado_por_fkey"
+            columns: ["convidado_por"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          ativo: boolean | null
+          avatar_url: string | null
+          cargo: Database["public"]["Enums"]["cargo_tipo"] | null
+          created_at: string | null
+          email: string
+          id: string
+          nome: string
+          setor: Database["public"]["Enums"]["setor_tipo"] | null
+          updated_at: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          avatar_url?: string | null
+          cargo?: Database["public"]["Enums"]["cargo_tipo"] | null
+          created_at?: string | null
+          email: string
+          id: string
+          nome: string
+          setor?: Database["public"]["Enums"]["setor_tipo"] | null
+          updated_at?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          avatar_url?: string | null
+          cargo?: Database["public"]["Enums"]["cargo_tipo"] | null
+          created_at?: string | null
+          email?: string
+          id?: string
+          nome?: string
+          setor?: Database["public"]["Enums"]["setor_tipo"] | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_role: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "colaborador"
+      cargo_tipo:
+        | "sdr"
+        | "closer"
+        | "gestor_trafego"
+        | "social_media"
+        | "financeiro"
+      setor_tipo: "comercial" | "trafego" | "social_media" | "financeiro"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +273,16 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "colaborador"],
+      cargo_tipo: [
+        "sdr",
+        "closer",
+        "gestor_trafego",
+        "social_media",
+        "financeiro",
+      ],
+      setor_tipo: ["comercial", "trafego", "social_media", "financeiro"],
+    },
   },
 } as const
