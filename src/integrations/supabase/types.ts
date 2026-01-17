@@ -2344,6 +2344,7 @@ export type Database = {
         Returns: boolean
       }
       is_admin_or_financeiro: { Args: never; Returns: boolean }
+      process_scheduled_notifications: { Args: never; Returns: Json }
     }
     Enums: {
       app_role: "admin" | "colaborador"
