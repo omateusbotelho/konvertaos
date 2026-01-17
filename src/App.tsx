@@ -16,6 +16,7 @@ const RedefinirSenha = lazy(() => import("./pages/auth/RedefinirSenha"));
 const AceitarConvite = lazy(() => import("./pages/auth/AceitarConvite"));
 const Equipe = lazy(() => import("./pages/Equipe"));
 const Perfil = lazy(() => import("./pages/Perfil"));
+const PipelineSDR = lazy(() => import("./pages/comercial/PipelineSDR"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -73,6 +74,14 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <Perfil />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/comercial/sdr"
+                element={
+                  <ProtectedRoute>
+                    <PipelineSDR />
                   </ProtectedRoute>
                 }
               />
