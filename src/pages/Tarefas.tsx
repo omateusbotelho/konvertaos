@@ -15,6 +15,7 @@ import { Plus, LayoutGrid, List } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { AppLayout } from '@/components/layout/AppLayout';
 import {
   TarefaCard,
   TarefaKanbanColumn,
@@ -165,7 +166,8 @@ export default function Tarefas() {
   const isLoading = tarefasLoading || etapasLoading;
 
   return (
-    <div className="flex flex-col h-full">
+    <AppLayout>
+      <div className="flex flex-col h-full">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -276,6 +278,7 @@ export default function Tarefas() {
         onOpenChange={setDrawerOpen}
         onEdit={handleEditTarefa}
       />
-    </div>
+      </div>
+    </AppLayout>
   );
 }
