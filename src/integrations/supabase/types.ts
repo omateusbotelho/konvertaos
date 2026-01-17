@@ -2274,6 +2274,24 @@ export type Database = {
           ultima_atividade_data: string
         }[]
       }
+      get_projetos_stats: {
+        Args: never
+        Returns: {
+          onboardings: number
+          projetos_ativos: number
+          tarefas_atrasadas: number
+          tarefas_pendentes: number
+        }[]
+      }
+      get_projetos_task_counts: {
+        Args: { p_projeto_ids: string[] }
+        Returns: {
+          projeto_id: string
+          tarefas_atrasadas: number
+          tarefas_concluidas: number
+          total_tarefas: number
+        }[]
+      }
       get_user_cargo: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["cargo_tipo"]

@@ -57,13 +57,22 @@ export function useLeadsCloser(filters?: UseLeadsCloserFilters) {
   return useQuery({
     queryKey: ["leads-closer", filters],
     queryFn: async (): Promise<LeadCloser[]> => {
+      // Single query with resource embedding for all related data
       let query = supabase
         .from("leads")
         .select(`
           *,
           origens_lead:origem_id(nome),
           servicos:servico_interesse_id(nome),
-          sdr:sdr_responsavel_id(nome)
+          sdr:sdr_responsavel_id(nome),
+          follow_ups!follow_ups_lead_id_fkey(
+            data_programada,
+            descricao,
+            concluido
+          ),
+          atividades_lead!atividades_lead_lead_id_fkey(
+            data_atividade
+          )
         `)
         .eq("funil_atual", "closer");
 
@@ -100,40 +109,39 @@ export function useLeadsCloser(filters?: UseLeadsCloserFilters) {
 
       if (error) throw error;
 
-      // Get follow-ups and last activity using optimized RPC
-      const leadIds = data?.map((l) => l.id) || [];
-      let followUps: Record<string, { data: Date; descricao?: string }> = {};
-      let ultimasAtividades: Record<string, Date> = {};
+      // Process embedded data to extract follow-ups and last activity
+      let result = (data || []).map((lead) => {
+        // Get next pending follow-up (not completed, earliest date)
+        const pendingFollowUps = (lead.follow_ups as any[] || [])
+          .filter((fu: any) => !fu.concluido)
+          .sort((a: any, b: any) => 
+            new Date(a.data_programada).getTime() - new Date(b.data_programada).getTime()
+          );
+        
+        const nextFollowUp = pendingFollowUps[0];
+        
+        // Get last activity date
+        const atividades = (lead.atividades_lead as any[] || [])
+          .map((a: any) => new Date(a.data_atividade))
+          .sort((a, b) => b.getTime() - a.getTime());
+        
+        const ultimaAtividade = atividades[0];
 
-      if (leadIds.length > 0) {
-        const { data: aggregatedData } = await supabase.rpc(
-          "get_leads_followups_and_activities",
-          { p_lead_ids: leadIds }
-        );
-
-        if (aggregatedData) {
-          aggregatedData.forEach((item: any) => {
-            if (item.proximo_followup_data) {
-              followUps[item.lead_id] = {
-                data: new Date(item.proximo_followup_data),
-                descricao: item.proximo_followup_descricao || undefined,
-              };
-            }
-            if (item.ultima_atividade_data) {
-              ultimasAtividades[item.lead_id] = new Date(item.ultima_atividade_data);
-            }
-          });
-        }
-      }
-
-      let result = (data || []).map((lead) => ({
-        ...lead,
-        origem_nome: (lead.origens_lead as any)?.nome,
-        servico_nome: (lead.servicos as any)?.nome,
-        sdr_nome: (lead.sdr as any)?.nome,
-        follow_up: followUps[lead.id],
-        ultima_atividade: ultimasAtividades[lead.id],
-      }));
+        return {
+          ...lead,
+          origem_nome: (lead.origens_lead as any)?.nome,
+          servico_nome: (lead.servicos as any)?.nome,
+          sdr_nome: (lead.sdr as any)?.nome,
+          follow_up: nextFollowUp ? {
+            data: new Date(nextFollowUp.data_programada),
+            descricao: nextFollowUp.descricao || undefined,
+          } : undefined,
+          ultima_atividade: ultimaAtividade,
+          // Clean up embedded arrays from final object
+          follow_ups: undefined,
+          atividades_lead: undefined,
+        };
+      });
 
       // Filter by proposta pendente > 48h
       if (filters?.propostaPendente48h) {

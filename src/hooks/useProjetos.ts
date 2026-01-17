@@ -73,15 +73,15 @@ export function useProjetos(filters: UseProjetosFilters = {}) {
       if (error) throw error;
       if (!data?.length) return [];
 
-      // Get task counts for all projects in a single query (optimized)
+      // Use optimized RPC to get task counts in a single query
       const projectIds = data.map((p) => p.id);
       
-      const { data: tarefas } = await supabase
-        .from("tarefas")
-        .select("projeto_id, concluida, data_vencimento")
-        .in("projeto_id", projectIds);
+      const { data: taskCounts } = await supabase.rpc(
+        "get_projetos_task_counts",
+        { p_projeto_ids: projectIds }
+      );
 
-      const now = new Date();
+      // Create lookup map for task counts
       const tarefasByProjeto: Record<string, { total: number; concluidas: number; atrasadas: number }> = {};
       
       // Initialize all projects with zero counts
@@ -89,14 +89,14 @@ export function useProjetos(filters: UseProjetosFilters = {}) {
         tarefasByProjeto[id] = { total: 0, concluidas: 0, atrasadas: 0 };
       });
       
-      // Aggregate counts from single query result
-      (tarefas || []).forEach(t => {
-        if (t.projeto_id && tarefasByProjeto[t.projeto_id]) {
-          tarefasByProjeto[t.projeto_id].total++;
-          if (t.concluida) tarefasByProjeto[t.projeto_id].concluidas++;
-          if (!t.concluida && t.data_vencimento && new Date(t.data_vencimento) < now) {
-            tarefasByProjeto[t.projeto_id].atrasadas++;
-          }
+      // Populate from RPC result
+      (taskCounts || []).forEach((tc: any) => {
+        if (tc.projeto_id) {
+          tarefasByProjeto[tc.projeto_id] = {
+            total: Number(tc.total_tarefas) || 0,
+            concluidas: Number(tc.tarefas_concluidas) || 0,
+            atrasadas: Number(tc.tarefas_atrasadas) || 0,
+          };
         }
       });
 
@@ -120,6 +120,7 @@ export function useProjetos(filters: UseProjetosFilters = {}) {
       return projetos;
     },
     enabled: !!user,
+    staleTime: 2 * 60 * 1000,
   });
 }
 
@@ -194,35 +195,26 @@ export function useProjetosStats() {
   return useQuery({
     queryKey: ["projetos-stats"],
     queryFn: async () => {
-      const { data: projetos, error } = await supabase
-        .from("projetos")
-        .select("id, status");
+      // Use optimized RPC to get all stats in a single query
+      const { data, error } = await supabase.rpc("get_projetos_stats");
 
       if (error) throw error;
-
-      const { data: tarefas } = await supabase
-        .from("tarefas")
-        .select("id, concluida, data_vencimento, projeto_id");
-
-      const now = new Date();
-      const ativos = projetos?.filter((p) => p.status === "ativo").length || 0;
-      const totalTarefas = tarefas?.filter((t) => !t.concluida).length || 0;
-      const atrasadas = tarefas?.filter(
-        (t) => !t.concluida && t.data_vencimento && new Date(t.data_vencimento) < now
-      ).length || 0;
-
-      // Count onboardings (projetos com nome contendo "onboarding" e status ativo)
-      const onboardings = projetos?.filter(
-        (p) => p.status === "ativo"
-      ).length || 0;
+      
+      const stats = data?.[0] || {
+        projetos_ativos: 0,
+        tarefas_pendentes: 0,
+        tarefas_atrasadas: 0,
+        onboardings: 0,
+      };
 
       return {
-        projetosAtivos: ativos,
-        tarefasPendentes: totalTarefas,
-        tarefasAtrasadas: atrasadas,
-        onboardings,
+        projetosAtivos: Number(stats.projetos_ativos) || 0,
+        tarefasPendentes: Number(stats.tarefas_pendentes) || 0,
+        tarefasAtrasadas: Number(stats.tarefas_atrasadas) || 0,
+        onboardings: Number(stats.onboardings) || 0,
       };
     },
+    staleTime: 2 * 60 * 1000,
   });
 }
 
