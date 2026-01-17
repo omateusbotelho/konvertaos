@@ -71,27 +71,34 @@ export function useProjetos(filters: UseProjetosFilters = {}) {
 
       const { data, error } = await query;
       if (error) throw error;
+      if (!data?.length) return [];
 
-      // Get task counts for each project
+      // Get task counts for all projects in a single query (optimized)
       const projectIds = data.map((p) => p.id);
       
       const { data: tarefas } = await supabase
         .from("tarefas")
-        .select("id, projeto_id, concluida, data_vencimento")
+        .select("projeto_id, concluida, data_vencimento")
         .in("projeto_id", projectIds);
 
       const now = new Date();
-      const tarefasByProjeto = tarefas?.reduce((acc, t) => {
-        if (!acc[t.projeto_id]) {
-          acc[t.projeto_id] = { total: 0, concluidas: 0, atrasadas: 0 };
+      const tarefasByProjeto: Record<string, { total: number; concluidas: number; atrasadas: number }> = {};
+      
+      // Initialize all projects with zero counts
+      projectIds.forEach(id => {
+        tarefasByProjeto[id] = { total: 0, concluidas: 0, atrasadas: 0 };
+      });
+      
+      // Aggregate counts from single query result
+      (tarefas || []).forEach(t => {
+        if (t.projeto_id && tarefasByProjeto[t.projeto_id]) {
+          tarefasByProjeto[t.projeto_id].total++;
+          if (t.concluida) tarefasByProjeto[t.projeto_id].concluidas++;
+          if (!t.concluida && t.data_vencimento && new Date(t.data_vencimento) < now) {
+            tarefasByProjeto[t.projeto_id].atrasadas++;
+          }
         }
-        acc[t.projeto_id].total++;
-        if (t.concluida) acc[t.projeto_id].concluidas++;
-        if (!t.concluida && t.data_vencimento && new Date(t.data_vencimento) < now) {
-          acc[t.projeto_id].atrasadas++;
-        }
-        return acc;
-      }, {} as Record<string, { total: number; concluidas: number; atrasadas: number }>) || {};
+      });
 
       let projetos = data.map((projeto): Projeto => ({
         ...projeto,
