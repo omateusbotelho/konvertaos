@@ -12,6 +12,7 @@ import { ArrowLeft, Plus, Search, MoreHorizontal, Edit, Trash2 } from "lucide-re
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { useCustosFixos, useCustosVariaveis } from "@/hooks/useFinanceiro";
+import { useAuth } from "@/hooks/use-auth";
 
 const categoriaColors: Record<string, string> = {
   ferramenta: "bg-info text-info-foreground",
@@ -38,6 +39,7 @@ const meses = [
 ];
 
 export default function Custos() {
+  const { isAdmin } = useAuth();
   const currentDate = new Date();
   const [tab, setTab] = useState("fixos");
   const [searchFixo, setSearchFixo] = useState("");
@@ -166,10 +168,12 @@ export default function Custos() {
                                 <Edit className="h-4 w-4 mr-2" />
                                 Editar
                               </DropdownMenuItem>
-                              <DropdownMenuItem className="text-destructive">
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Excluir
-                              </DropdownMenuItem>
+                              {isAdmin && (
+                                <DropdownMenuItem className="text-destructive">
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  Excluir
+                                </DropdownMenuItem>
+                              )}
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </TableCell>
@@ -270,10 +274,12 @@ export default function Custos() {
                                 <Edit className="h-4 w-4 mr-2" />
                                 Editar
                               </DropdownMenuItem>
-                              <DropdownMenuItem className="text-destructive">
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Excluir
-                              </DropdownMenuItem>
+                              {isAdmin && (
+                                <DropdownMenuItem className="text-destructive">
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  Excluir
+                                </DropdownMenuItem>
+                              )}
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </TableCell>
