@@ -1105,6 +1105,91 @@ export type Database = {
         }
         Relationships: []
       }
+      nps_config: {
+        Row: {
+          ativo: boolean | null
+          created_at: string | null
+          email_assunto: string | null
+          email_corpo: string | null
+          frequencia_meses: number | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          created_at?: string | null
+          email_assunto?: string | null
+          email_corpo?: string | null
+          frequencia_meses?: number | null
+          id?: string
+          updated_at?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          created_at?: string | null
+          email_assunto?: string | null
+          email_corpo?: string | null
+          frequencia_meses?: number | null
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      nps_envios: {
+        Row: {
+          cliente_id: string
+          created_at: string | null
+          enviado_em: string | null
+          expira_em: string
+          id: string
+          respondido: boolean | null
+          resposta_id: string | null
+          token: string
+        }
+        Insert: {
+          cliente_id: string
+          created_at?: string | null
+          enviado_em?: string | null
+          expira_em: string
+          id?: string
+          respondido?: boolean | null
+          resposta_id?: string | null
+          token: string
+        }
+        Update: {
+          cliente_id?: string
+          created_at?: string | null
+          enviado_em?: string | null
+          expira_em?: string
+          id?: string
+          respondido?: boolean | null
+          resposta_id?: string | null
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nps_envios_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nps_envios_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "margem_por_cliente"
+            referencedColumns: ["cliente_id"]
+          },
+          {
+            foreignKeyName: "nps_envios_resposta_id_fkey"
+            columns: ["resposta_id"]
+            isOneToOne: false
+            referencedRelation: "nps_respostas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       nps_respostas: {
         Row: {
           cliente_id: string
