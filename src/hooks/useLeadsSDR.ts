@@ -85,49 +85,32 @@ export function useLeadsSDR(filters?: UseLeadsSDRFilters) {
 
       if (error) throw error;
 
-      // Get follow-ups for each lead
+      // Get follow-ups and last activity using optimized RPC
       const leadIds = data?.map((l) => l.id) || [];
       let followUps: Record<string, { data: Date; descricao?: string }> = {};
+      let ultimasAtividades: Record<string, Date> = {};
 
       if (leadIds.length > 0) {
-        const { data: followUpData } = await supabase
-          .from("follow_ups")
-          .select("*")
-          .in("lead_id", leadIds)
-          .eq("concluido", false)
-          .order("data_programada", { ascending: true });
+        const { data: aggregatedData } = await supabase.rpc(
+          "get_leads_followups_and_activities",
+          { p_lead_ids: leadIds }
+        );
 
-        if (followUpData) {
-          followUpData.forEach((fu) => {
-            if (!followUps[fu.lead_id]) {
-              followUps[fu.lead_id] = {
-                data: new Date(fu.data_programada),
-                descricao: fu.descricao || undefined,
+        if (aggregatedData) {
+          aggregatedData.forEach((item: any) => {
+            if (item.proximo_followup_data) {
+              followUps[item.lead_id] = {
+                data: new Date(item.proximo_followup_data),
+                descricao: item.proximo_followup_descricao || undefined,
               };
             }
-          });
-        }
-      }
-
-      // Get last activity for each lead
-      let ultimasAtividades: Record<string, Date> = {};
-      if (leadIds.length > 0) {
-        const { data: atividadesData } = await supabase
-          .from("atividades_lead")
-          .select("lead_id, data_atividade")
-          .in("lead_id", leadIds)
-          .order("data_atividade", { ascending: false });
-
-        if (atividadesData) {
-          atividadesData.forEach((at) => {
-            if (!ultimasAtividades[at.lead_id] && at.data_atividade) {
-              ultimasAtividades[at.lead_id] = new Date(at.data_atividade);
+            if (item.ultima_atividade_data) {
+              ultimasAtividades[item.lead_id] = new Date(item.ultima_atividade_data);
             }
           });
         }
       }
 
-      // Filter by pending follow-up if requested
       let result = (data || []).map((lead) => ({
         ...lead,
         origem_nome: (lead.origens_lead as any)?.nome,
