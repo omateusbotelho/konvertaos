@@ -402,14 +402,14 @@ export function useCreateTarefa() {
         prioridade: data.prioridade,
         data_vencimento: data.data_vencimento,
         recorrente: data.recorrente,
-        recorrencia_config: data.recorrencia_config as unknown as Record<string, unknown>,
+        recorrencia_config: data.recorrencia_config ? JSON.parse(JSON.stringify(data.recorrencia_config)) : null,
         tarefa_pai_id: data.tarefa_pai_id,
         created_by_id: user.id,
       };
 
       const { data: tarefa, error } = await supabase
         .from('tarefas')
-        .insert(insertData)
+        .insert([insertData])
         .select()
         .single();
 
