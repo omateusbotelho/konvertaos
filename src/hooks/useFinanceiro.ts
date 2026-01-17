@@ -282,14 +282,16 @@ export function useResumoFinanceiro(mes: number, ano: number) {
 
       const totalCustosVariaveis = custosVariaveis?.reduce((sum, c) => sum + Number(c.valor), 0) || 0;
 
-      // Get inadimplência
-      const { data: cobrancasAtrasadas } = await supabase
+      // Get inadimplência do período (cobranças vencidas no período com status atrasado ou falhou)
+      const { data: cobrancasInadimplentes } = await supabase
         .from("cobrancas")
         .select("valor, cliente_id")
-        .eq("status", "atrasado");
+        .in("status", ["atrasado", "falhou"])
+        .gte("data_vencimento", startStr)
+        .lte("data_vencimento", endStr);
 
-      const inadimplencia = cobrancasAtrasadas?.reduce((sum, c) => sum + Number(c.valor), 0) || 0;
-      const clientesInadimplentes = new Set(cobrancasAtrasadas?.map(c => c.cliente_id)).size;
+      const inadimplencia = cobrancasInadimplentes?.reduce((sum, c) => sum + Number(c.valor), 0) || 0;
+      const clientesInadimplentes = new Set(cobrancasInadimplentes?.map(c => c.cliente_id)).size;
 
       const despesa = totalCustosFixos + totalCustosVariaveis;
       const lucro = receita - despesa;
