@@ -57,10 +57,102 @@ import {
   XCircle,
 } from "lucide-react";
 import { TableEmptyState } from "@/components/ui/empty-state";
+import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { DateRange } from "react-day-picker";
+
+// Skeleton component that matches the exact layout
+function ClientesSkeleton({ viewMode }: { viewMode: ViewMode }) {
+  if (viewMode === "cards") {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-fade-in">
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+          <div key={i} className="bg-card border border-border/20 rounded-lg overflow-hidden">
+            <div className="p-4 pb-3">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-5 w-5 rounded" />
+                  <div className="space-y-1.5">
+                    <Skeleton className="h-5 w-32" />
+                    <Skeleton className="h-3 w-28" />
+                  </div>
+                </div>
+                <Skeleton className="h-8 w-8 rounded" />
+              </div>
+            </div>
+            <div className="px-4 pb-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <Skeleton className="h-6 w-20" />
+                <Skeleton className="h-5 w-16 rounded-full" />
+              </div>
+              <div className="flex gap-1.5">
+                <Skeleton className="h-5 w-16 rounded-full" />
+                <Skeleton className="h-5 w-20 rounded-full" />
+              </div>
+              <Skeleton className="h-3 w-24" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-md border animate-fade-in">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Cliente</TableHead>
+            <TableHead>CNPJ/CPF</TableHead>
+            <TableHead>Fee Mensal</TableHead>
+            <TableHead>Serviços</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Desde</TableHead>
+            <TableHead className="w-[50px]"></TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+            <TableRow key={i}>
+              <TableCell>
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-4 w-4 rounded" />
+                  <div className="space-y-1.5">
+                    <Skeleton className="h-4 w-36" />
+                    <Skeleton className="h-3 w-28" />
+                  </div>
+                </div>
+              </TableCell>
+              <TableCell>
+                <Skeleton className="h-4 w-32" />
+              </TableCell>
+              <TableCell>
+                <Skeleton className="h-4 w-20" />
+              </TableCell>
+              <TableCell>
+                <div className="flex gap-1">
+                  <Skeleton className="h-5 w-16 rounded-full" />
+                  <Skeleton className="h-5 w-14 rounded-full" />
+                </div>
+              </TableCell>
+              <TableCell>
+                <Skeleton className="h-5 w-16 rounded-full" />
+              </TableCell>
+              <TableCell>
+                <Skeleton className="h-4 w-16" />
+              </TableCell>
+              <TableCell>
+                <Skeleton className="h-8 w-8 rounded" />
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
+}
 
 type ViewMode = "table" | "cards";
 type StatusFilter = "todos" | "ativo" | "inadimplente" | "cancelado";
@@ -292,9 +384,7 @@ export default function Clientes() {
 
         {/* Content */}
         {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-          </div>
+          <ClientesSkeleton viewMode={viewMode} />
         ) : viewMode === "table" ? (
           <ClientesTable clientes={clientes || []} onView={(id) => navigate(`/clientes/${id}`)} />
         ) : (
