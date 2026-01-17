@@ -1,4 +1,4 @@
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, memo } from "react";
 import { useDroppable } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { cn } from "@/lib/utils";
@@ -16,7 +16,7 @@ interface KanbanColumnProps {
   defaultCollapsed?: boolean;
 }
 
-export function KanbanColumn({
+function KanbanColumnComponent({
   id,
   title,
   count,
@@ -98,3 +98,21 @@ export function KanbanColumn({
     </div>
   );
 }
+
+// Memoize column - re-render only when count or itemIds change
+export const KanbanColumn = memo(KanbanColumnComponent, (prevProps, nextProps) => {
+  // Check if itemIds array is the same
+  const sameItemIds = 
+    prevProps.itemIds.length === nextProps.itemIds.length &&
+    prevProps.itemIds.every((id, idx) => id === nextProps.itemIds[idx]);
+
+  return (
+    prevProps.id === nextProps.id &&
+    prevProps.title === nextProps.title &&
+    prevProps.count === nextProps.count &&
+    prevProps.color === nextProps.color &&
+    prevProps.isCollapsible === nextProps.isCollapsible &&
+    prevProps.defaultCollapsed === nextProps.defaultCollapsed &&
+    sameItemIds
+  );
+});
