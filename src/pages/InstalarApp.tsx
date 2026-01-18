@@ -86,7 +86,7 @@ export default function InstalarApp() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="w-20 h-20 mx-auto mb-4 rounded-2xl overflow-hidden shadow-lg">
-            <img src="/logo-192.png" alt="KonvertaOS" className="w-full h-full object-cover" />
+            <img src="/logo-192.webp" alt="KonvertaOS" className="w-full h-full object-cover" />
           </div>
           <CardTitle className="text-2xl">Instalar KonvertaOS</CardTitle>
           <CardDescription>

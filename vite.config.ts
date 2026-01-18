@@ -18,7 +18,7 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["favicon.png", "logo-192.png", "logo-512.png"],
+      includeAssets: ["favicon.png", "logo-192.webp", "logo-192.png", "logo-512.png"],
       manifest: {
         name: "KonvertaOS",
         short_name: "KonvertaOS",
