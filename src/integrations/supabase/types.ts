@@ -764,6 +764,106 @@ export type Database = {
         }
         Relationships: []
       }
+      contrato_templates: {
+        Row: {
+          ativo: boolean | null
+          conteudo: string
+          created_at: string | null
+          id: string
+          nome: string
+          variaveis: Json | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          conteudo: string
+          created_at?: string | null
+          id?: string
+          nome: string
+          variaveis?: Json | null
+        }
+        Update: {
+          ativo?: boolean | null
+          conteudo?: string
+          created_at?: string | null
+          id?: string
+          nome?: string
+          variaveis?: Json | null
+        }
+        Relationships: []
+      }
+      contratos: {
+        Row: {
+          assinado_em: string | null
+          assinado_por: string | null
+          cliente_id: string
+          conteudo: string
+          created_at: string | null
+          created_by_id: string | null
+          data_fim: string | null
+          data_inicio: string | null
+          id: string
+          status: Database["public"]["Enums"]["status_contrato"] | null
+          titulo: string
+          updated_at: string | null
+          url_pdf: string | null
+          valor: number | null
+        }
+        Insert: {
+          assinado_em?: string | null
+          assinado_por?: string | null
+          cliente_id: string
+          conteudo: string
+          created_at?: string | null
+          created_by_id?: string | null
+          data_fim?: string | null
+          data_inicio?: string | null
+          id?: string
+          status?: Database["public"]["Enums"]["status_contrato"] | null
+          titulo: string
+          updated_at?: string | null
+          url_pdf?: string | null
+          valor?: number | null
+        }
+        Update: {
+          assinado_em?: string | null
+          assinado_por?: string | null
+          cliente_id?: string
+          conteudo?: string
+          created_at?: string | null
+          created_by_id?: string | null
+          data_fim?: string | null
+          data_inicio?: string | null
+          id?: string
+          status?: Database["public"]["Enums"]["status_contrato"] | null
+          titulo?: string
+          updated_at?: string | null
+          url_pdf?: string | null
+          valor?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contratos_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contratos_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "margem_por_cliente"
+            referencedColumns: ["cliente_id"]
+          },
+          {
+            foreignKeyName: "contratos_created_by_id_fkey"
+            columns: ["created_by_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       convites: {
         Row: {
           cargo: Database["public"]["Enums"]["cargo_tipo"]
@@ -2446,6 +2546,7 @@ export type Database = {
       status_cliente: "ativo" | "inadimplente" | "cancelado"
       status_cobranca: "pendente" | "pago" | "atrasado" | "cancelado" | "falhou"
       status_comissao: "pendente" | "aprovada" | "paga" | "cancelada"
+      status_contrato: "rascunho" | "enviado" | "assinado" | "cancelado"
       status_projeto: "ativo" | "pausado" | "concluido" | "cancelado"
       status_reuniao: "agendada" | "realizada" | "cancelada"
       tipo_arquivo: "contrato" | "briefing" | "documento" | "outro"
@@ -2671,6 +2772,7 @@ export const Constants = {
       status_cliente: ["ativo", "inadimplente", "cancelado"],
       status_cobranca: ["pendente", "pago", "atrasado", "cancelado", "falhou"],
       status_comissao: ["pendente", "aprovada", "paga", "cancelada"],
+      status_contrato: ["rascunho", "enviado", "assinado", "cancelado"],
       status_projeto: ["ativo", "pausado", "concluido", "cancelado"],
       status_reuniao: ["agendada", "realizada", "cancelada"],
       tipo_arquivo: ["contrato", "briefing", "documento", "outro"],
