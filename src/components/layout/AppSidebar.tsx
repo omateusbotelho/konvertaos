@@ -19,6 +19,8 @@ import {
   Banknote,
   Target,
   Snowflake,
+  Coins,
+  CalendarOff,
 } from "lucide-react";
 import { KonvertaAvatar } from "@/components/ui/konverta-avatar";
 import konvertaLogo from "@/assets/konverta-logo.png";
@@ -41,6 +43,12 @@ const navItems = [
   { title: "Projetos", href: "/projetos", icon: FolderKanban },
   { title: "Calendário", href: "/calendario", icon: Calendar },
   { title: "Ranking", href: "/ranking", icon: Trophy },
+];
+
+// Items condicionais por cargo
+const cargoNavItems = [
+  { title: "Minhas Comissões", href: "/minhas-comissoes", icon: Coins, cargos: ['sdr', 'closer'] as string[] | null },
+  { title: "Minhas Ausências", href: "/ausencias", icon: CalendarOff, cargos: null }, // null = todos
 ];
 
 const adminNavItems = [
@@ -119,6 +127,30 @@ export function AppSidebar() {
                 </NavLink>
               </li>
             ))}
+
+            {/* Conditional items based on cargo */}
+            {cargoNavItems.map((item) => {
+              // Se item tem cargos específicos, verificar se usuário tem esse cargo
+              if (item.cargos && !item.cargos.includes(profile?.cargo || '')) return null;
+              
+              return (
+                <li key={item.href}>
+                  <NavLink
+                    to={item.href}
+                    onClick={closeMobile}
+                    className={cn(
+                      "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-150",
+                      isActive(item.href)
+                        ? "bg-primary/10 text-primary"
+                        : "text-muted-foreground hover:bg-card hover:text-foreground"
+                    )}
+                  >
+                    <item.icon className="h-5 w-5 flex-shrink-0" />
+                    {!isCollapsed && <span>{item.title}</span>}
+                  </NavLink>
+                </li>
+              );
+            })}
           </ul>
 
           {/* Admin section */}
