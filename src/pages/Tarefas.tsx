@@ -11,11 +11,17 @@ import {
   DragOverlay,
 } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
-import { Plus, LayoutGrid, List } from 'lucide-react';
+import { Plus, LayoutGrid, List, CheckCircle2 } from 'lucide-react';
+import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
+import { KonvertaAvatar } from '@/components/ui/konverta-avatar';
+import { cn } from '@/lib/utils';
 import {
   TarefaCard,
   TarefaKanbanColumn,
@@ -29,6 +35,7 @@ import {
   useMoveTarefa,
   Tarefa,
   TarefaFilters,
+  coresPrioridade,
 } from '@/hooks/useTarefas';
 import { useToast } from '@/hooks/use-toast';
 
@@ -251,10 +258,146 @@ export default function Tarefas() {
           </DragOverlay>
         </DndContext>
       ) : (
-        <div className="mt-6">
-          <p className="text-muted-foreground">
-            Visualização em lista em desenvolvimento...
-          </p>
+        <div className="mt-6 border rounded-lg overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-12">
+                  <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
+                </TableHead>
+                <TableHead>Tarefa</TableHead>
+                <TableHead>Cliente</TableHead>
+                <TableHead>Projeto</TableHead>
+                <TableHead>Responsável</TableHead>
+                <TableHead>Prioridade</TableHead>
+                <TableHead>Prazo</TableHead>
+                <TableHead>Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {tarefas?.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                    Nenhuma tarefa encontrada
+                  </TableCell>
+                </TableRow>
+              ) : (
+                tarefas?.map((tarefa) => {
+                  const isOverdue = tarefa.data_vencimento && !tarefa.concluida && new Date(tarefa.data_vencimento) < new Date();
+                  const isToday = tarefa.data_vencimento && format(new Date(tarefa.data_vencimento), 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd');
+                  
+                  return (
+                    <TableRow
+                      key={tarefa.id}
+                      className="cursor-pointer hover:bg-muted/50"
+                      onClick={() => handleTarefaClick(tarefa)}
+                    >
+                      <TableCell onClick={(e) => e.stopPropagation()}>
+                        <Checkbox
+                          checked={tarefa.concluida || false}
+                          onCheckedChange={async (checked) => {
+                            const etapaConcluida = etapas?.find(e => e.is_done);
+                            const etapaPadrao = etapas?.find(e => e.is_default);
+                            
+                            if (checked && etapaConcluida) {
+                              await moveTarefa.mutateAsync({
+                                tarefaId: tarefa.id,
+                                etapaId: etapaConcluida.id,
+                                ordem: 0,
+                                concluir: true,
+                              });
+                              toast({
+                                title: '✓ Tarefa concluída!',
+                                description: tarefa.titulo,
+                              });
+                            } else if (!checked && etapaPadrao) {
+                              await moveTarefa.mutateAsync({
+                                tarefaId: tarefa.id,
+                                etapaId: etapaPadrao.id,
+                                ordem: 0,
+                                concluir: false,
+                              });
+                            }
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <div
+                            className="w-1 h-8 rounded-full"
+                            style={{ backgroundColor: coresPrioridade[tarefa.prioridade || 'media'] }}
+                          />
+                          <div>
+                            <p className={cn(
+                              "font-medium",
+                              tarefa.concluida && "line-through text-muted-foreground"
+                            )}>
+                              {tarefa.titulo}
+                            </p>
+                            {(tarefa._count?.subtarefas || 0) > 0 && (
+                              <p className="text-xs text-muted-foreground">
+                                {tarefa._count?.subtarefas_concluidas || 0}/{tarefa._count?.subtarefas} subtarefas
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-sm">
+                          {tarefa.cliente?.nome_fantasia || tarefa.cliente?.razao_social || '-'}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-sm">{tarefa.projeto?.nome || '-'}</span>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <KonvertaAvatar
+                            name={tarefa.responsavel?.nome}
+                            src={tarefa.responsavel?.avatar_url}
+                            size="sm"
+                          />
+                          <span className="text-sm">{tarefa.responsavel?.nome || '-'}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          style={{
+                            borderColor: coresPrioridade[tarefa.prioridade || 'media'],
+                            color: coresPrioridade[tarefa.prioridade || 'media'],
+                          }}
+                        >
+                          {tarefa.prioridade || 'média'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {tarefa.data_vencimento ? (
+                          <span className={cn(
+                            "text-sm",
+                            isOverdue && "text-destructive font-medium",
+                            isToday && !tarefa.concluida && "text-warning font-medium"
+                          )}>
+                            {format(new Date(tarefa.data_vencimento), 'dd/MM/yyyy')}
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={tarefa.concluida ? 'default' : 'secondary'}>
+                          {tarefa.concluida 
+                            ? 'Concluída' 
+                            : etapas?.find(e => e.id === tarefa.etapa_id)?.nome || 'Pendente'
+                          }
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
+            </TableBody>
+          </Table>
         </div>
       )}
 
