@@ -1,24 +1,23 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Download, Smartphone, Monitor } from "lucide-react";
+import { Download, Smartphone, Zap, Maximize2, ArrowLeft } from "lucide-react";
 import { usePWAInstall } from "@/hooks/usePWAInstall";
 import { BenefitItem, InstallInstructions, InstalledState } from "@/components/pwa";
 
 const BENEFITS = [
   {
     icon: Smartphone,
-    title: "Acesso rápido",
-    description: "Abra direto da tela inicial do seu dispositivo",
+    title: "Acesso instantâneo",
+    description: "Abra direto da tela inicial, sem abrir o navegador",
   },
   {
-    icon: Download,
-    title: "Funciona offline",
-    description: "Acesse informações mesmo sem internet",
+    icon: Zap,
+    title: "Modo offline",
+    description: "Continue trabalhando mesmo sem conexão",
   },
   {
-    icon: Monitor,
-    title: "Tela cheia",
-    description: "Experiência imersiva sem barra do navegador",
+    icon: Maximize2,
+    title: "Experiência imersiva",
+    description: "Tela cheia, sem barras do navegador",
   },
 ] as const;
 
@@ -32,28 +31,48 @@ export default function InstalarApp() {
   const platform = isIOS ? "ios" : isAndroid ? "android" : "unknown";
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="w-20 h-20 mx-auto mb-4 rounded-2xl overflow-hidden shadow-lg">
-            <img src="/favicon.png" alt="KonvertaOS" className="w-full h-full object-cover" />
-          </div>
-          <CardTitle className="text-2xl">Instalar KonvertaOS</CardTitle>
-          <CardDescription>
-            Instale o app no seu dispositivo para uma experiência ainda melhor.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Benefits */}
-          <div className="space-y-3">
-            {BENEFITS.map((benefit) => (
-              <BenefitItem key={benefit.title} {...benefit} />
-            ))}
+    <div className="min-h-screen flex items-center justify-center p-6 bg-background">
+      <div className="w-full max-w-md space-y-10">
+        {/* Header Section */}
+        <header className="text-center space-y-6">
+          {/* Logo with subtle glow effect */}
+          <div className="relative mx-auto w-24 h-24">
+            <div className="absolute inset-0 rounded-2xl bg-primary/20 blur-xl opacity-50" />
+            <div className="relative w-24 h-24 rounded-2xl overflow-hidden border border-border/30 shadow-xl">
+              <img 
+                src="/favicon.png" 
+                alt="KonvertaOS" 
+                className="w-full h-full object-cover"
+              />
+            </div>
           </div>
 
-          {/* Install button or instructions */}
+          {/* Title & Subtitle with better hierarchy */}
+          <div className="space-y-2">
+            <h1 className="text-3xl font-bold text-foreground tracking-tight">
+              Instalar KonvertaOS
+            </h1>
+            <p className="text-muted-foreground text-lg leading-relaxed max-w-xs mx-auto">
+              Uma experiência ainda melhor no seu dispositivo
+            </p>
+          </div>
+        </header>
+
+        {/* Benefits Section */}
+        <section className="space-y-3" aria-label="Benefícios">
+          {BENEFITS.map((benefit) => (
+            <BenefitItem key={benefit.title} {...benefit} />
+          ))}
+        </section>
+
+        {/* CTA Section */}
+        <section className="space-y-4" aria-label="Ações">
           {canInstall ? (
-            <Button className="w-full gap-2" size="lg" onClick={install}>
+            <Button 
+              size="lg" 
+              className="w-full h-14 text-base font-semibold gap-3 shadow-lg shadow-primary/20 transition-all duration-200 hover:shadow-xl hover:shadow-primary/30 hover:scale-[1.02] active:scale-[0.98]"
+              onClick={install}
+            >
               <Download className="w-5 h-5" />
               Instalar agora
             </Button>
@@ -61,11 +80,17 @@ export default function InstalarApp() {
             <InstallInstructions platform={platform} />
           )}
 
-          <Button variant="ghost" className="w-full" onClick={() => window.location.href = "/"}>
+          <Button 
+            variant="ghost" 
+            size="lg"
+            className="w-full h-12 text-muted-foreground gap-2 transition-all duration-200 hover:text-foreground hover:gap-3"
+            onClick={() => window.location.href = "/"}
+          >
+            <ArrowLeft className="w-4 h-4" />
             Continuar no navegador
           </Button>
-        </CardContent>
-      </Card>
+        </section>
+      </div>
     </div>
   );
 }

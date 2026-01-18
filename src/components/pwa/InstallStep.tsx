@@ -7,11 +7,11 @@ interface InstallStepProps {
 
 export function InstallStep({ step, children }: InstallStepProps) {
   return (
-    <li className="flex items-center gap-2">
-      <span className="w-5 h-5 rounded-full bg-muted flex items-center justify-center text-xs">
+    <li className="flex items-center gap-3 py-1">
+      <span className="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-semibold flex-shrink-0">
         {step}
       </span>
-      {children}
+      <span className="text-muted-foreground">{children}</span>
     </li>
   );
 }
