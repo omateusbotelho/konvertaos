@@ -21,6 +21,7 @@ import {
   Snowflake,
   Coins,
   CalendarOff,
+  FileText,
 } from "lucide-react";
 import { KonvertaAvatar } from "@/components/ui/konverta-avatar";
 import konvertaLogo from "@/assets/konverta-logo.png";
@@ -54,6 +55,7 @@ const cargoNavItems = [
 const adminNavItems = [
   { title: "Equipe", href: "/equipe", icon: UsersRound },
   { title: "Financeiro", href: "/financeiro", icon: Banknote },
+  { title: "Contratos", href: "/contratos", icon: FileText },
 ];
 
 const bottomNavItems = [
