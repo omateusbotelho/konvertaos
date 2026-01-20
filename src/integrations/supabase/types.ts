@@ -2521,6 +2521,7 @@ export type Database = {
         | "proposta_enviada"
         | "negociacao"
         | "fechado_ganho"
+        | "no_show"
         | "perdido"
       etapa_frios: "esfriar" | "reativacao" | "reativado" | "descartado"
       etapa_sdr:
@@ -2529,6 +2530,7 @@ export type Database = {
         | "contato_realizado"
         | "qualificado"
         | "reuniao_agendada"
+        | "no_show"
         | "perdido"
       forma_pagamento: "boleto" | "pix" | "cartao"
       funil_tipo: "sdr" | "closer" | "frios" | "convertido"
@@ -2744,6 +2746,7 @@ export const Constants = {
         "proposta_enviada",
         "negociacao",
         "fechado_ganho",
+        "no_show",
         "perdido",
       ],
       etapa_frios: ["esfriar", "reativacao", "reativado", "descartado"],
@@ -2753,6 +2756,7 @@ export const Constants = {
         "contato_realizado",
         "qualificado",
         "reuniao_agendada",
+        "no_show",
         "perdido",
       ],
       forma_pagamento: ["boleto", "pix", "cartao"],

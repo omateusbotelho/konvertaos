@@ -14,6 +14,7 @@ interface KanbanColumnProps {
   itemIds: string[];
   isCollapsible?: boolean;
   defaultCollapsed?: boolean;
+  isReadonly?: boolean;
 }
 
 function KanbanColumnComponent({
@@ -25,9 +26,10 @@ function KanbanColumnComponent({
   itemIds,
   isCollapsible = false,
   defaultCollapsed = false,
+  isReadonly = false,
 }: KanbanColumnProps) {
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
-  const { isOver, setNodeRef } = useDroppable({ id });
+  const { isOver, setNodeRef } = useDroppable({ id, disabled: isReadonly });
 
   if (isCollapsible && isCollapsed) {
     return (
@@ -62,10 +64,11 @@ function KanbanColumnComponent({
       ref={setNodeRef}
       className={cn(
         "flex-shrink-0 w-[280px] lg:w-[300px] flex flex-col bg-card/50 rounded-lg border border-border/20 max-h-[calc(100vh-280px)] transition-all duration-200",
-        isOver && "ring-2 ring-primary bg-primary/5 scale-[1.01]"
+        isOver && !isReadonly && "ring-2 ring-primary bg-primary/5 scale-[1.01]",
+        isReadonly && "opacity-75"
       )}
       role="region"
-      aria-label={`Coluna ${title} com ${count} leads`}
+      aria-label={`Coluna ${title} com ${count} leads${isReadonly ? ' (somente leitura)' : ''}`}
     >
       {/* Column Header */}
       <div className="flex items-center gap-2 p-3 border-b border-border/20">
@@ -101,7 +104,7 @@ function KanbanColumnComponent({
             aria-label={`Lista de leads em ${title}`}
           >
             {children}
-            {isOver && (
+            {isOver && !isReadonly && (
               <div className="h-[120px] border-2 border-dashed border-primary/50 rounded-lg flex items-center justify-center text-sm text-primary animate-pulse">
                 Soltar aqui
               </div>
@@ -127,6 +130,7 @@ export const KanbanColumn = memo(KanbanColumnComponent, (prevProps, nextProps) =
     prevProps.color === nextProps.color &&
     prevProps.isCollapsible === nextProps.isCollapsible &&
     prevProps.defaultCollapsed === nextProps.defaultCollapsed &&
+    prevProps.isReadonly === nextProps.isReadonly &&
     sameItemIds
   );
 });

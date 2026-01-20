@@ -41,6 +41,7 @@ import {
   useOrigensLead,
   useUpdateLeadEtapa,
   useLeadsCount,
+  useNoShowLeadsFromCloser,
   ETAPAS_SDR,
   type EtapaSDR,
   type LeadSDR,
@@ -59,13 +60,14 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const ETAPA_CONFIG: Record<
   EtapaSDR,
-  { label: string; color: string; collapsible?: boolean }
+  { label: string; color: string; collapsible?: boolean; readonly?: boolean }
 > = {
   novo: { label: "Novo Lead", color: "#3B82F6" },
   tentativa_contato: { label: "Tentativa de Contato", color: "#8B5CF6" },
   contato_realizado: { label: "Contato Realizado", color: "#F59E0B" },
   qualificado: { label: "Qualificado", color: "#10B981" },
   reuniao_agendada: { label: "Reunião Agendada", color: "#06B6D4" },
+  no_show: { label: "No-show", color: "#F97316", collapsible: true, readonly: true },
   perdido: { label: "Perdido", color: "#EF4444", collapsible: true },
 };
 
@@ -107,6 +109,7 @@ export default function PipelineSDR() {
   );
 
   const { data: leads, isLoading } = useLeadsSDR(filters);
+  const { data: noShowLeads } = useNoShowLeadsFromCloser(); // No-show leads from Closer
   const { data: origens } = useOrigensLead();
   const { data: totalLeads } = useLeadsCount();
   const updateEtapa = useUpdateLeadEtapa();
@@ -181,6 +184,7 @@ export default function PipelineSDR() {
       contato_realizado: [],
       qualificado: [],
       reuniao_agendada: [],
+      no_show: [],
       perdido: [],
     };
 
@@ -191,12 +195,17 @@ export default function PipelineSDR() {
       }
     });
 
+    // Add no-show leads from Closer pipeline (SDR can view but not control)
+    noShowLeads?.forEach((lead) => {
+      grouped.no_show.push(lead);
+    });
+
     return grouped;
-  }, [leads]);
+  }, [leads, noShowLeads]);
 
   const activeLead = useMemo(
-    () => leads?.find((l) => l.id === activeId) || null,
-    [leads, activeId]
+    () => leads?.find((l) => l.id === activeId) || noShowLeads?.find((l) => l.id === activeId) || null,
+    [leads, noShowLeads, activeId]
   );
 
   const handleDragStart = useCallback((event: DragStartEvent) => {
@@ -504,17 +513,18 @@ export default function PipelineSDR() {
                   const config = ETAPA_CONFIG[etapa];
                   const etapaLeads = leadsByEtapa[etapa] || [];
 
-                  return (
-                    <KanbanColumn
-                      key={etapa}
-                      id={etapa}
-                      title={config.label}
-                      count={etapaLeads.length}
-                      color={config.color}
-                      itemIds={etapaLeads.map((l) => l.id)}
-                      isCollapsible={config.collapsible}
-                      defaultCollapsed={config.collapsible}
-                    >
+                    return (
+                      <KanbanColumn
+                        key={etapa}
+                        id={etapa}
+                        title={config.label}
+                        count={etapaLeads.length}
+                        color={config.color}
+                        itemIds={etapaLeads.map((l) => l.id)}
+                        isCollapsible={config.collapsible}
+                        defaultCollapsed={config.collapsible}
+                        isReadonly={config.readonly}
+                      >
                       {etapaLeads.map((lead) => (
                         <LeadCard
                           key={lead.id}
@@ -531,6 +541,7 @@ export default function PipelineSDR() {
                               : undefined
                           }
                           etapaDesde={lead.updated_at ? new Date(lead.updated_at) : undefined}
+                          disabled={config.readonly}
                           onClick={() => openLeadDrawer(lead)}
                         />
                       ))}

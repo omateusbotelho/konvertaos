@@ -68,6 +68,7 @@ const ETAPA_CONFIG: Record<
   proposta_enviada: { label: "Proposta Enviada", color: "#F59E0B" },
   negociacao: { label: "Negociação", color: "#06B6D4" },
   fechado_ganho: { label: "Fechado (Ganho)", color: "#10B981" },
+  no_show: { label: "No-show", color: "#F97316", collapsible: true },
   perdido: { label: "Perdido", color: "#EF4444", collapsible: true },
 };
 
@@ -177,6 +178,7 @@ export default function PipelineCloser() {
       proposta_enviada: [],
       negociacao: [],
       fechado_ganho: [],
+      no_show: [],
       perdido: [],
     };
 
@@ -227,6 +229,32 @@ export default function PipelineCloser() {
     if (targetEtapa === "perdido") {
       setPendingDrop({ leadId, etapa: targetEtapa });
       setPerdaModal({ open: true, leadId, leadNome: lead.nome });
+      return;
+    }
+
+    if (targetEtapa === "no_show") {
+      // Move to no_show - simple move with activity log
+      updateEtapa.mutate(
+        { leadId, etapa: targetEtapa },
+        {
+          onSuccess: async () => {
+            // Create activity for no-show
+            await supabase.from("atividades_lead").insert({
+              lead_id: leadId,
+              tipo: "anotacao" as const,
+              descricao: "Lead marcado como No-show pelo Closer",
+              realizado_por_id: profile?.id,
+              data_atividade: new Date().toISOString(),
+            });
+            toast.success("Lead marcado como No-show");
+            // Invalidate SDR queries so they see this lead
+            queryClient.invalidateQueries({ queryKey: ["leads-sdr"] });
+          },
+          onError: () => {
+            toast.error("Erro ao mover lead");
+          },
+        }
+      );
       return;
     }
 

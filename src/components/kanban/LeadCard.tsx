@@ -55,6 +55,7 @@ interface LeadCardProps {
   };
   createdAt?: Date;
   etapaDesde?: Date;
+  disabled?: boolean;
   onClick?: () => void;
   onEdit?: () => void;
   onRegistrarAtividade?: () => void;
@@ -95,6 +96,7 @@ function LeadCardComponent({
   followUp,
   ultimaAtividade,
   etapaDesde,
+  disabled = false,
   onClick,
   onEdit,
   onRegistrarAtividade,
@@ -107,7 +109,7 @@ function LeadCardComponent({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id });
+  } = useSortable({ id, disabled });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -135,7 +137,9 @@ function LeadCardComponent({
       role="listitem"
       aria-label={`Lead: ${nome}${empresa ? `, empresa ${empresa}` : ''}${followUpStatus === 'overdue' ? ', follow-up atrasado' : ''}`}
       className={cn(
-        "bg-card border border-border/20 rounded-lg p-3 cursor-grab active:cursor-grabbing transition-all duration-200 hover:border-border/40 hover:shadow-md",
+        "bg-card border border-border/20 rounded-lg p-3 transition-all duration-200 hover:border-border/40 hover:shadow-md",
+        !disabled && "cursor-grab active:cursor-grabbing",
+        disabled && "cursor-default opacity-80",
         isDragging && "opacity-90 scale-105 shadow-2xl shadow-primary/20 rotate-2 z-[100] ring-2 ring-primary/30"
       )}
     >

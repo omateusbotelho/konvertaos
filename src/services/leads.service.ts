@@ -261,6 +261,7 @@ export const ETAPAS_SDR: EtapaSDR[] = [
   "contato_realizado",
   "qualificado",
   "reuniao_agendada",
+  "no_show",
   "perdido",
 ];
 
@@ -270,6 +271,7 @@ export const ETAPAS_CLOSER: EtapaCloser[] = [
   "proposta_enviada",
   "negociacao",
   "fechado_ganho",
+  "no_show",
   "perdido",
 ];
 
