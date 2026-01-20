@@ -1,4 +1,76 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600&display=swap');
+/* Neue Montreal - Display/Headings */
+@font-face {
+  font-family: 'Neue Montreal';
+  src: url('https://cdn.jsdelivr.net/gh/nicholaslambs/NeueMontreal@master/NeueMontreal-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Neue Montreal';
+  src: url('https://cdn.jsdelivr.net/gh/nicholaslambs/NeueMontreal@master/NeueMontreal-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Neue Montreal';
+  src: url('https://cdn.jsdelivr.net/gh/nicholaslambs/NeueMontreal@master/NeueMontreal-Bold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Neue Montreal';
+  src: url('https://cdn.jsdelivr.net/gh/nicholaslambs/NeueMontreal@master/NeueMontreal-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Aktiv Grotesk - Body text */
+@font-face {
+  font-family: 'Aktiv Grotesk';
+  src: url('https://cdn.jsdelivr.net/gh/nicholaslambs/AktivGrotesk@master/AktivGrotesk-Light.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Aktiv Grotesk';
+  src: url('https://cdn.jsdelivr.net/gh/nicholaslambs/AktivGrotesk@master/AktivGrotesk-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Aktiv Grotesk';
+  src: url('https://cdn.jsdelivr.net/gh/nicholaslambs/AktivGrotesk@master/AktivGrotesk-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Aktiv Grotesk';
+  src: url('https://cdn.jsdelivr.net/gh/nicholaslambs/AktivGrotesk@master/AktivGrotesk-Bold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Aktiv Grotesk';
+  src: url('https://cdn.jsdelivr.net/gh/nicholaslambs/AktivGrotesk@master/AktivGrotesk-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
 
 @tailwind base;
 @tailwind components;
@@ -71,15 +143,15 @@
   }
 
   h1 {
-    @apply text-[28px] font-semibold text-white;
+    @apply text-[28px] font-semibold text-white font-display;
   }
 
   h2 {
-    @apply text-[22px] font-semibold text-white;
+    @apply text-[22px] font-semibold text-white font-display;
   }
 
   h3 {
-    @apply text-[18px] font-medium text-white;
+    @apply text-[18px] font-medium text-white font-display;
   }
 
   p {

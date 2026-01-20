@@ -14,7 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Plus Jakarta Sans", "system-ui", "sans-serif"],
+        sans: ["Aktiv Grotesk", "system-ui", "sans-serif"],
+        display: ["Neue Montreal", "system-ui", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
