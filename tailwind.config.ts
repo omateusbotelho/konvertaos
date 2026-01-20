@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Aktiv Grotesk", "system-ui", "sans-serif"],
-        display: ["Neue Montreal", "system-ui", "sans-serif"],
+        sans: ["Inter", "system-ui", "sans-serif"],
+        display: ["Inter", "system-ui", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -82,11 +82,10 @@ export default {
           light: "hsl(var(--gray-light))",
         },
         // Konverta Palette
-        cabernet: "hsl(var(--cabernet))",
-        hydrangea: "hsl(var(--hydrangea))",
-        "blue-water": "hsl(var(--blue-water))",
-        "good-day": "hsl(var(--good-day))",
-        "ice-d": "hsl(var(--ice-d))",
+        navy: "hsl(var(--navy))",
+        violet: "hsl(var(--violet))",
+        blue: "hsl(var(--blue))",
+        lavender: "hsl(var(--lavender))",
       },
       spacing: {
         xs: "4px",

@@ -1,76 +1,5 @@
-/* Neue Montreal - Display/Headings */
-@font-face {
-  font-family: 'Neue Montreal';
-  src: url('https://cdn.jsdelivr.net/gh/nicholaslambs/NeueMontreal@master/NeueMontreal-Regular.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Neue Montreal';
-  src: url('https://cdn.jsdelivr.net/gh/nicholaslambs/NeueMontreal@master/NeueMontreal-Medium.woff2') format('woff2');
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Neue Montreal';
-  src: url('https://cdn.jsdelivr.net/gh/nicholaslambs/NeueMontreal@master/NeueMontreal-Bold.woff2') format('woff2');
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Neue Montreal';
-  src: url('https://cdn.jsdelivr.net/gh/nicholaslambs/NeueMontreal@master/NeueMontreal-Bold.woff2') format('woff2');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
-/* Aktiv Grotesk - Body text */
-@font-face {
-  font-family: 'Aktiv Grotesk';
-  src: url('https://cdn.jsdelivr.net/gh/nicholaslambs/AktivGrotesk@master/AktivGrotesk-Light.woff2') format('woff2');
-  font-weight: 300;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Aktiv Grotesk';
-  src: url('https://cdn.jsdelivr.net/gh/nicholaslambs/AktivGrotesk@master/AktivGrotesk-Regular.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Aktiv Grotesk';
-  src: url('https://cdn.jsdelivr.net/gh/nicholaslambs/AktivGrotesk@master/AktivGrotesk-Medium.woff2') format('woff2');
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Aktiv Grotesk';
-  src: url('https://cdn.jsdelivr.net/gh/nicholaslambs/AktivGrotesk@master/AktivGrotesk-Bold.woff2') format('woff2');
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Aktiv Grotesk';
-  src: url('https://cdn.jsdelivr.net/gh/nicholaslambs/AktivGrotesk@master/AktivGrotesk-Bold.woff2') format('woff2');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
+/* Inter Font */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -80,38 +9,38 @@
   :root {
     /* 
      * Konverta Dark Mode Palette
-     * Based on: Cabernet-Sauvignon, H-Y Drangea, Blue Water, Good-Day, Ice-D, Off-White, In-K
+     * #0B2D5B, #4B3FFF, #1F7BFF, #7C8CFF, #141414, #F4F4F4, #2A2A2A, #6B7280
      */
     
-    /* Backgrounds - In-K based */
-    --background: 0 0% 12%;
-    --background-secondary: 0 0% 15%;
+    /* Backgrounds - #141414 */
+    --background: 0 0% 8%;
+    --background-secondary: 0 0% 10%;
     
-    /* Foreground - Off-White */
-    --foreground: 0 0% 91%;
+    /* Foreground - #F4F4F4 */
+    --foreground: 0 0% 96%;
 
-    /* Cards - slightly elevated from background */
-    --card: 0 0% 15%;
-    --card-foreground: 0 0% 91%;
+    /* Cards - #2A2A2A */
+    --card: 0 0% 16%;
+    --card-foreground: 0 0% 96%;
 
     /* Popovers */
-    --popover: 0 0% 15%;
-    --popover-foreground: 0 0% 91%;
+    --popover: 0 0% 16%;
+    --popover-foreground: 0 0% 96%;
 
-    /* Primary - Cabernet-Sauvignon (#5C26FF) */
-    --primary: 255 100% 57%;
+    /* Primary - #4B3FFF */
+    --primary: 244 100% 62%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary - H-Y Drangea (#7861FF) */
-    --secondary: 249 100% 69%;
+    /* Secondary - #7C8CFF */
+    --secondary: 233 100% 74%;
     --secondary-foreground: 0 0% 100%;
 
-    /* Muted - Ice-D based */
-    --muted: 222 42% 30%;
-    --muted-foreground: 222 42% 60%;
+    /* Muted - #6B7280 */
+    --muted: 220 9% 46%;
+    --muted-foreground: 220 9% 60%;
 
-    /* Accent - Blue Water (#005AFF) */
-    --accent: 219 100% 50%;
+    /* Accent - #1F7BFF */
+    --accent: 215 100% 56%;
     --accent-foreground: 0 0% 100%;
 
     /* Destructive */
@@ -126,38 +55,37 @@
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 0%;
 
-    /* Info - Good-Day (#3AA1FF) */
-    --info: 209 100% 61%;
+    /* Info - #1F7BFF */
+    --info: 215 100% 56%;
     --info-foreground: 0 0% 100%;
 
-    /* Border - Ice-D darker */
-    --border: 222 20% 25%;
-    --input: 0 0% 18%;
-    --ring: 255 100% 57%;
+    /* Border */
+    --border: 220 9% 30%;
+    --input: 0 0% 16%;
+    --ring: 244 100% 62%;
 
     --radius: 0.5rem;
 
     /* Sidebar */
-    --sidebar-background: 0 0% 10%;
-    --sidebar-foreground: 0 0% 91%;
-    --sidebar-primary: 255 100% 57%;
+    --sidebar-background: 0 0% 6%;
+    --sidebar-foreground: 0 0% 96%;
+    --sidebar-primary: 244 100% 62%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 18%;
-    --sidebar-accent-foreground: 0 0% 91%;
-    --sidebar-border: 222 20% 25%;
-    --sidebar-ring: 255 100% 57%;
+    --sidebar-accent: 0 0% 16%;
+    --sidebar-accent-foreground: 0 0% 96%;
+    --sidebar-border: 220 9% 30%;
+    --sidebar-ring: 244 100% 62%;
 
-    /* Grays - Ice-D based scale */
-    --gray-dark: 222 20% 25%;
-    --gray-medium: 222 42% 60%;
-    --gray-light: 0 0% 91%;
+    /* Grays */
+    --gray-dark: 220 9% 30%;
+    --gray-medium: 220 9% 46%;
+    --gray-light: 0 0% 96%;
     
     /* Palette reference colors */
-    --cabernet: 255 100% 57%;
-    --hydrangea: 249 100% 69%;
-    --blue-water: 219 100% 50%;
-    --good-day: 209 100% 61%;
-    --ice-d: 222 42% 74%;
+    --navy: 215 78% 20%;
+    --violet: 244 100% 62%;
+    --blue: 215 100% 56%;
+    --lavender: 233 100% 74%;
   }
 }
 
