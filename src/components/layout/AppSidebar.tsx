@@ -36,9 +36,6 @@ import {
 
 const navItems = [
   { title: "Dashboard", href: "/", icon: LayoutDashboard },
-  { title: "Pipeline SDR", href: "/comercial/sdr", icon: Target },
-  { title: "Pipeline Closer", href: "/comercial/closer", icon: Target },
-  { title: "Leads Frios", href: "/comercial/leads-frios", icon: Snowflake },
   { title: "Clientes", href: "/clientes", icon: Users },
   { title: "Tarefas", href: "/tarefas", icon: CheckSquare },
   { title: "Projetos", href: "/projetos", icon: FolderKanban },
@@ -46,9 +43,12 @@ const navItems = [
   { title: "Ranking", href: "/ranking", icon: Trophy },
 ];
 
-// Items condicionais por cargo
+// Items condicionais por cargo (null = todos podem ver)
 const cargoNavItems = [
-  { title: "Minhas Comissões", href: "/minhas-comissoes", icon: Coins, cargos: ['sdr', 'closer'] as string[] | null },
+  { title: "Pipeline SDR", href: "/comercial/sdr", icon: Target, cargos: ['sdr'] as string[] },
+  { title: "Pipeline Closer", href: "/comercial/closer", icon: Target, cargos: ['closer'] as string[] },
+  { title: "Leads Frios", href: "/comercial/leads-frios", icon: Snowflake, cargos: ['sdr', 'closer'] as string[] },
+  { title: "Minhas Comissões", href: "/minhas-comissoes", icon: Coins, cargos: ['sdr', 'closer'] as string[] },
   { title: "Minhas Ausências", href: "/ausencias", icon: CalendarOff, cargos: null }, // null = todos
 ];
 
