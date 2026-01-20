@@ -78,58 +78,86 @@
 
 @layer base {
   :root {
-    --background: 200 33% 5%;
-    --background-secondary: 207 43% 8%;
-    --foreground: 206 56% 94%;
+    /* 
+     * Konverta Dark Mode Palette
+     * Based on: Cabernet-Sauvignon, H-Y Drangea, Blue Water, Good-Day, Ice-D, Off-White, In-K
+     */
+    
+    /* Backgrounds - In-K based */
+    --background: 0 0% 12%;
+    --background-secondary: 0 0% 15%;
+    
+    /* Foreground - Off-White */
+    --foreground: 0 0% 91%;
 
-    --card: 207 43% 8%;
-    --card-foreground: 206 56% 94%;
+    /* Cards - slightly elevated from background */
+    --card: 0 0% 15%;
+    --card-foreground: 0 0% 91%;
 
-    --popover: 207 43% 8%;
-    --popover-foreground: 206 56% 94%;
+    /* Popovers */
+    --popover: 0 0% 15%;
+    --popover-foreground: 0 0% 91%;
 
-    --primary: 217 91% 60%;
+    /* Primary - Cabernet-Sauvignon (#5C26FF) */
+    --primary: 255 100% 57%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 207 43% 8%;
-    --secondary-foreground: 206 56% 94%;
+    /* Secondary - H-Y Drangea (#7861FF) */
+    --secondary: 249 100% 69%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 206 12% 45%;
-    --muted-foreground: 207 11% 55%;
+    /* Muted - Ice-D based */
+    --muted: 222 42% 30%;
+    --muted-foreground: 222 42% 60%;
 
-    --accent: 217 91% 60%;
+    /* Accent - Blue Water (#005AFF) */
+    --accent: 219 100% 50%;
     --accent-foreground: 0 0% 100%;
 
+    /* Destructive */
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
+    /* Success */
     --success: 160 84% 39%;
     --success-foreground: 0 0% 100%;
 
+    /* Warning */
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 0%;
 
-    --info: 217 91% 60%;
+    /* Info - Good-Day (#3AA1FF) */
+    --info: 209 100% 61%;
     --info-foreground: 0 0% 100%;
 
-    --border: 206 12% 45%;
-    --input: 207 43% 8%;
-    --ring: 217 91% 60%;
+    /* Border - Ice-D darker */
+    --border: 222 20% 25%;
+    --input: 0 0% 18%;
+    --ring: 255 100% 57%;
 
     --radius: 0.5rem;
 
-    --sidebar-background: 200 33% 5%;
-    --sidebar-foreground: 206 56% 94%;
-    --sidebar-primary: 217 91% 60%;
+    /* Sidebar */
+    --sidebar-background: 0 0% 10%;
+    --sidebar-foreground: 0 0% 91%;
+    --sidebar-primary: 255 100% 57%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 207 43% 8%;
-    --sidebar-accent-foreground: 206 56% 94%;
-    --sidebar-border: 206 12% 45%;
-    --sidebar-ring: 217 91% 60%;
+    --sidebar-accent: 0 0% 18%;
+    --sidebar-accent-foreground: 0 0% 91%;
+    --sidebar-border: 222 20% 25%;
+    --sidebar-ring: 255 100% 57%;
 
-    --gray-dark: 206 12% 45%;
-    --gray-medium: 207 11% 55%;
-    --gray-light: 206 56% 94%;
+    /* Grays - Ice-D based scale */
+    --gray-dark: 222 20% 25%;
+    --gray-medium: 222 42% 60%;
+    --gray-light: 0 0% 91%;
+    
+    /* Palette reference colors */
+    --cabernet: 255 100% 57%;
+    --hydrangea: 249 100% 69%;
+    --blue-water: 219 100% 50%;
+    --good-day: 209 100% 61%;
+    --ice-d: 222 42% 74%;
   }
 }
 

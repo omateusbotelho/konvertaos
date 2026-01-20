@@ -81,6 +81,12 @@ export default {
           medium: "hsl(var(--gray-medium))",
           light: "hsl(var(--gray-light))",
         },
+        // Konverta Palette
+        cabernet: "hsl(var(--cabernet))",
+        hydrangea: "hsl(var(--hydrangea))",
+        "blue-water": "hsl(var(--blue-water))",
+        "good-day": "hsl(var(--good-day))",
+        "ice-d": "hsl(var(--ice-d))",
       },
       spacing: {
         xs: "4px",
