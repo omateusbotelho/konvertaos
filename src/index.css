@@ -40,7 +40,7 @@
 
     /* Muted - #2B2F36 */
     --muted: 218 11% 19%;
-    --muted-foreground: 215 10% 53%;
+    --muted-foreground: 215 12% 63%; /* Increased from 53% for better contrast */
 
     /* Accent - #00C11B (Green) */
     --accent: 128 100% 38%;
@@ -87,10 +87,10 @@
     --brand-surface: 0 0% 10%;
     --brand-elevated: 218 11% 19%;
     
-    /* Text scale */
+    /* Text scale - optimized for WCAG AA contrast */
     --text-primary: 0 0% 95%;
-    --text-secondary: 215 10% 53%;
-    --text-muted: 215 9% 49%;
+    --text-secondary: 215 12% 63%; /* 4.5:1 contrast on dark bg */
+    --text-muted: 215 10% 58%; /* Improved from 49% */
 
     /* State colors */
     --state-hover: 210 52% 11%;
