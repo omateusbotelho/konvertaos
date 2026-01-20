@@ -109,21 +109,21 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Headings - Inter works best with 600-700 weights */
+  /* Headings - Responsive with Inter optimized weights */
   h1 {
-    @apply text-[28px] font-semibold tracking-tight text-white leading-tight;
+    @apply text-2xl md:text-[28px] lg:text-[32px] font-semibold tracking-tight text-white leading-tight;
   }
 
   h2 {
-    @apply text-[22px] font-semibold tracking-tight text-white leading-snug;
+    @apply text-xl md:text-[22px] lg:text-[26px] font-semibold tracking-tight text-white leading-snug;
   }
 
   h3 {
-    @apply text-[18px] font-medium text-white leading-snug;
+    @apply text-lg md:text-[18px] lg:text-xl font-medium text-white leading-snug;
   }
 
   h4 {
-    @apply text-base font-medium text-white;
+    @apply text-base md:text-[17px] font-medium text-white;
   }
 
   /* Body text - regular weight for readability */
