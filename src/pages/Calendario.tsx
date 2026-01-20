@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek, addDays, isToday } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus, Filter } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
@@ -11,6 +11,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useReunioes, useAusencias, Reuniao, Ausencia, coresReuniao, labelsReuniao } from '@/hooks/useCalendario';
 import NovaReuniaoModal from '@/components/calendario/NovaReuniaoModal';
 import ReuniaoDrawer from '@/components/calendario/ReuniaoDrawer';
+import { AppLayout } from '@/components/layout';
 import { cn } from '@/lib/utils';
 
 type ViewType = 'month' | 'week' | 'day';
@@ -107,20 +108,20 @@ export default function Calendario() {
   const hours = Array.from({ length: 12 }, (_, i) => i + 8); // 8h to 19h
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Calendário</h1>
-          <p className="text-muted-foreground">Gerencie reuniões e eventos</p>
+    <AppLayout>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">Calendário</h1>
+            <p className="text-muted-foreground">Gerencie reuniões e eventos</p>
+          </div>
+
+          <Button onClick={() => setIsModalOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Novo Evento
+          </Button>
         </div>
-
-        <Button onClick={() => setIsModalOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Novo Evento
-        </Button>
-      </div>
-
       {/* Navigation and Filters */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-card rounded-lg border p-4">
         <div className="flex items-center gap-2">
@@ -210,10 +211,12 @@ export default function Calendario() {
               const isCurrentMonth = isSameMonth(day, currentDate);
 
               return (
-                <div
+              <div
                   key={idx}
                   className={cn(
-                    'min-h-[120px] p-2 border-r border-b last:border-r-0 cursor-pointer hover:bg-muted/50 transition-colors',
+                    'min-h-[120px] p-2 border-r border-b last:border-r-0 cursor-pointer transition-all duration-150 group',
+                    'hover:bg-primary/5 hover:ring-1 hover:ring-primary/20 hover:ring-inset',
+                    'active:bg-primary/10',
                     !isCurrentMonth && 'bg-muted/30 text-muted-foreground'
                   )}
                   onClick={() => {
@@ -222,8 +225,9 @@ export default function Calendario() {
                   }}
                 >
                   <div className={cn(
-                    'text-sm font-medium mb-1',
-                    isToday(day) && 'bg-primary text-primary-foreground w-7 h-7 rounded-full flex items-center justify-center'
+                    'text-sm font-medium mb-1 transition-colors',
+                    isToday(day) && 'bg-primary text-primary-foreground w-7 h-7 rounded-full flex items-center justify-center',
+                    !isToday(day) && 'group-hover:text-primary'
                   )}>
                     {format(day, 'd')}
                   </div>
@@ -404,9 +408,10 @@ export default function Calendario() {
         </div>
       )}
 
-      {/* Modals */}
-      <NovaReuniaoModal open={isModalOpen} onOpenChange={setIsModalOpen} />
-      <ReuniaoDrawer reuniaoId={selectedReuniao} onClose={() => setSelectedReuniao(null)} />
-    </div>
+        {/* Modals */}
+        <NovaReuniaoModal open={isModalOpen} onOpenChange={setIsModalOpen} />
+        <ReuniaoDrawer reuniaoId={selectedReuniao} onClose={() => setSelectedReuniao(null)} />
+      </div>
+    </AppLayout>
   );
 }

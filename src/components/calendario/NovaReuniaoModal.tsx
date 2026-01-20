@@ -31,6 +31,8 @@ const formSchema = z.object({
   projeto_id: z.string().optional(),
   cliente_id: z.string().optional(),
   recorrente: z.boolean(),
+  diasSemana: z.array(z.number()).optional(),
+  dataFimRecorrencia: z.date().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -44,6 +46,7 @@ export default function NovaReuniaoModal({ open, onOpenChange }: NovaReuniaoModa
   const [participantes, setParticipantes] = useState<Array<{ id: string; nome: string }>>([]);
   const [colaboradores, setColaboradores] = useState<Array<{ id: string; nome: string }>>([]);
   const [searchColaborador, setSearchColaborador] = useState('');
+  const [diasSelecionados, setDiasSelecionados] = useState<number[]>([]);
 
   const createReuniao = useCreateReuniao();
   const { data: projetos = [] } = useProjetos();
@@ -60,8 +63,30 @@ export default function NovaReuniaoModal({ open, onOpenChange }: NovaReuniaoModa
       local: '',
       descricao: '',
       recorrente: false,
+      diasSemana: [],
+      dataFimRecorrencia: undefined,
     },
   });
+
+  const isRecorrente = form.watch('recorrente');
+
+  const diasDaSemana = [
+    { value: 0, label: 'Dom' },
+    { value: 1, label: 'Seg' },
+    { value: 2, label: 'Ter' },
+    { value: 3, label: 'Qua' },
+    { value: 4, label: 'Qui' },
+    { value: 5, label: 'Sex' },
+    { value: 6, label: 'Sáb' },
+  ];
+
+  const toggleDia = (dia: number) => {
+    const newDias = diasSelecionados.includes(dia)
+      ? diasSelecionados.filter(d => d !== dia)
+      : [...diasSelecionados, dia].sort((a, b) => a - b);
+    setDiasSelecionados(newDias);
+    form.setValue('diasSemana', newDias);
+  };
 
   useEffect(() => {
     async function fetchColaboradores() {
@@ -99,6 +124,14 @@ export default function NovaReuniaoModal({ open, onOpenChange }: NovaReuniaoModa
     const [horaF, minF] = data.horaFim.split(':');
     dataFim.setHours(parseInt(horaF), parseInt(minF));
 
+    // Construir configuração de recorrência
+    const recorrenciaConfig = data.recorrente && diasSelecionados.length > 0 ? {
+      diasSemana: diasSelecionados,
+      horaInicio: data.horaInicio,
+      horaFim: data.horaFim,
+      dataFim: data.dataFimRecorrencia?.toISOString(),
+    } : null;
+
     await createReuniao.mutateAsync({
       titulo: data.titulo,
       tipo: data.tipo,
@@ -109,11 +142,13 @@ export default function NovaReuniaoModal({ open, onOpenChange }: NovaReuniaoModa
       projeto_id: data.projeto_id || undefined,
       cliente_id: data.cliente_id || undefined,
       recorrente: data.recorrente,
+      recorrencia_config: recorrenciaConfig,
       participantes: participantes.map(p => p.id),
     });
 
     form.reset();
     setParticipantes([]);
+    setDiasSelecionados([]);
     onOpenChange(false);
   };
 
@@ -192,6 +227,7 @@ export default function NovaReuniaoModal({ open, onOpenChange }: NovaReuniaoModa
                           mode="single"
                           selected={field.value}
                           onSelect={field.onChange}
+                          className="pointer-events-auto"
                         />
                       </PopoverContent>
                     </Popover>
@@ -364,6 +400,70 @@ export default function NovaReuniaoModal({ open, onOpenChange }: NovaReuniaoModa
                 </FormItem>
               )}
             />
+
+            {/* Opções de recorrência */}
+            {isRecorrente && (
+              <div className="space-y-4 p-4 bg-muted/50 rounded-lg border">
+                <div className="space-y-2">
+                  <FormLabel>Repetir nos dias</FormLabel>
+                  <div className="flex flex-wrap gap-2">
+                    {diasDaSemana.map((dia) => (
+                      <Button
+                        key={dia.value}
+                        type="button"
+                        size="sm"
+                        variant={diasSelecionados.includes(dia.value) ? "default" : "outline"}
+                        className="w-12"
+                        onClick={() => toggleDia(dia.value)}
+                      >
+                        {dia.label}
+                      </Button>
+                    ))}
+                  </div>
+                  {diasSelecionados.length === 0 && (
+                    <p className="text-xs text-muted-foreground">
+                      Selecione pelo menos um dia da semana
+                    </p>
+                  )}
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="dataFimRecorrencia"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Repetir até</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                'w-full justify-start text-left font-normal',
+                                !field.value && 'text-muted-foreground'
+                              )}
+                            >
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {field.value ? format(field.value, 'dd/MM/yyyy') : 'Selecione a data final'}
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) => date < new Date()}
+                            className="pointer-events-auto"
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            )}
 
             <div className="flex justify-end gap-2 pt-4">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
