@@ -222,7 +222,7 @@ export function LeadDrawerCloser({
 
           {/* Tab: Histórico de Atividades */}
           <TabsContent value="historico" className="flex-1 overflow-auto m-0">
-            <LeadAtividadesTimeline leadId={lead.id} />
+            <LeadAtividadesTimeline leadId={lead.id} leadNome={lead.nome} />
           </TabsContent>
 
           {/* Tab: Proposta */}
