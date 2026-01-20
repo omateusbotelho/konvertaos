@@ -5,6 +5,7 @@ import { formatDistanceToNow, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,6 +19,7 @@ import {
   Calendar,
   DollarSign,
   User,
+  CalendarPlus,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -30,6 +32,7 @@ interface LeadCardCloserProps {
   valorProposta?: number;
   etapaDesde?: Date;
   semResposta48h?: boolean;
+  etapaAtual?: string;
   onClick?: () => void;
   onReagendar?: () => void;
   onRegistrarAtividade?: () => void;
@@ -44,6 +47,7 @@ export function LeadCardCloser({
   valorProposta,
   etapaDesde,
   semResposta48h,
+  etapaAtual,
   onClick,
   onReagendar,
   onRegistrarAtividade,
@@ -154,6 +158,22 @@ export function LeadCardCloser({
               <AlertCircle className="w-3 h-3" />
               <span className="font-medium">Sem resposta há 48h</span>
             </div>
+          )}
+
+          {/* Reagendar button for no_show */}
+          {etapaAtual === "no_show" && onReagendar && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-2 w-full gap-1.5 text-xs h-8"
+              onClick={(e) => {
+                e.stopPropagation();
+                onReagendar();
+              }}
+            >
+              <CalendarPlus className="w-3.5 h-3.5" />
+              Reagendar Reunião
+            </Button>
           )}
         </div>
       </CardContent>

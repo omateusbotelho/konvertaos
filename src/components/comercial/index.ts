@@ -13,3 +13,4 @@ export { LeadCardFrio } from "./LeadCardFrio";
 export { ModalReativar } from "./ModalReativar";
 export { ModalDescartar } from "./ModalDescartar";
 export { ModalAtivacaoCliente } from "./ModalAtivacaoCliente";
+export { ModalReagendarReuniao } from "./ModalReagendarReuniao";

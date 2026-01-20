@@ -37,6 +37,7 @@ const tipoIcones: Record<string, string> = {
   ausencia_aprovada: "✅",
   nps_detrator: "😟",
   contrato_vencendo: "📄",
+  no_show_lead: "🚫",
   geral: "📢",
 };
 

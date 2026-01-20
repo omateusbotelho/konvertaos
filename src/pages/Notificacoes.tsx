@@ -39,6 +39,7 @@ const tipoIcones: Record<string, string> = {
   ausencia_aprovada: "✅",
   nps_detrator: "😟",
   contrato_vencendo: "📄",
+  no_show_lead: "🚫",
   geral: "📢",
 };
 
@@ -58,6 +59,7 @@ const tipoLabels: Record<string, string> = {
   ausencia_aprovada: "Ausências",
   nps_detrator: "NPS",
   contrato_vencendo: "Contratos",
+  no_show_lead: "No-show",
   geral: "Geral",
 };
 
