@@ -9,49 +9,49 @@
   :root {
     /* 
      * Konverta Brand Identity
-     * Primary: #DF2E17 (Red-Orange)
-     * Dark: #070808, #272727
-     * Light: #F9F9F9
-     * Gradient: Red to Orange
+     * Primary: #11283F (Dark Blue)
+     * Accent: #00C11B (Green)
+     * Dark: #0A0F14, #1A1A1A
+     * Light: #F2F2F2
      */
     
-    /* Backgrounds - #070808 */
-    --background: 0 2% 3%;
-    --background-secondary: 0 0% 15%;
+    /* Backgrounds - #0A0F14 */
+    --background: 210 33% 6%;
+    --background-secondary: 210 57% 16%;
     
-    /* Foreground - #F9F9F9 */
-    --foreground: 0 0% 98%;
+    /* Foreground - #F2F2F2 */
+    --foreground: 0 0% 95%;
 
-    /* Cards - #272727 */
-    --card: 0 0% 15%;
-    --card-foreground: 0 0% 98%;
+    /* Cards - #1A1A1A */
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 95%;
 
-    /* Popovers */
-    --popover: 0 0% 15%;
-    --popover-foreground: 0 0% 98%;
+    /* Popovers - #2B2F36 */
+    --popover: 218 11% 19%;
+    --popover-foreground: 0 0% 95%;
 
-    /* Primary - #DF2E17 */
-    --primary: 6 82% 48%;
+    /* Primary - #00C11B (Green Accent) */
+    --primary: 128 100% 38%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary - Darker Red */
-    --secondary: 6 70% 38%;
-    --secondary-foreground: 0 0% 100%;
+    /* Secondary - #11283F (Dark Blue) */
+    --secondary: 210 57% 16%;
+    --secondary-foreground: 0 0% 95%;
 
-    /* Muted - #272727 */
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 65%;
+    /* Muted - #2B2F36 */
+    --muted: 218 11% 19%;
+    --muted-foreground: 215 10% 53%;
 
-    /* Accent - Orange gradient end */
-    --accent: 25 95% 53%;
+    /* Accent - #00C11B (Green) */
+    --accent: 128 100% 38%;
     --accent-foreground: 0 0% 100%;
 
     /* Destructive */
     --destructive: 0 84% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Success */
-    --success: 142 76% 36%;
+    /* Success - Same as accent */
+    --success: 128 100% 38%;
     --success-foreground: 0 0% 100%;
 
     /* Warning */
@@ -59,41 +59,42 @@
     --warning-foreground: 0 0% 0%;
 
     /* Info */
-    --info: 25 95% 53%;
+    --info: 200 80% 50%;
     --info-foreground: 0 0% 100%;
 
-    /* Border */
-    --border: 0 0% 20%;
-    --input: 0 0% 15%;
-    --ring: 6 82% 48%;
+    /* Border - #2B2F36 */
+    --border: 218 11% 19%;
+    --border-soft: 218 10% 21%;
+    --input: 218 11% 19%;
+    --ring: 128 100% 38%;
 
     --radius: 0.75rem;
 
     /* Sidebar */
-    --sidebar-background: 0 2% 3%;
-    --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 6 82% 48%;
+    --sidebar-background: 210 33% 6%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 128 100% 38%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 15%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 0 0% 20%;
-    --sidebar-ring: 6 82% 48%;
+    --sidebar-accent: 210 57% 16%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 218 11% 19%;
+    --sidebar-ring: 128 100% 38%;
 
     /* Brand Colors */
-    --brand-red: 6 82% 48%;
-    --brand-orange: 25 95% 53%;
-    --brand-dark: 0 2% 3%;
-    --brand-gray: 0 0% 15%;
-    --brand-light: 0 0% 98%;
+    --brand-primary: 210 57% 16%;
+    --brand-accent: 128 100% 38%;
+    --brand-dark: 210 33% 6%;
+    --brand-surface: 0 0% 10%;
+    --brand-elevated: 218 11% 19%;
     
-    /* Neutral scale */
-    --white: 0 0% 100%;
-    --off-white: 0 0% 98%;
-    --light-gray: 0 0% 95%;
-    --medium-gray: 0 0% 45%;
-    --dark-gray: 0 0% 15%;
-    --charcoal: 0 0% 10%;
-    --near-black: 0 2% 3%;
+    /* Text scale */
+    --text-primary: 0 0% 95%;
+    --text-secondary: 215 10% 53%;
+    --text-muted: 215 9% 49%;
+
+    /* State colors */
+    --state-hover: 210 52% 11%;
+    --state-active: 128 100% 38%;
   }
 }
 

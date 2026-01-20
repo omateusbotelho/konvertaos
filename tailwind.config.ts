@@ -78,23 +78,20 @@ export default {
         },
         // Brand Colors
         brand: {
-          red: "hsl(var(--brand-red))",
-          orange: "hsl(var(--brand-orange))",
+          primary: "hsl(var(--brand-primary))",
+          accent: "hsl(var(--brand-accent))",
           dark: "hsl(var(--brand-dark))",
-          gray: "hsl(var(--brand-gray))",
-          light: "hsl(var(--brand-light))",
+          surface: "hsl(var(--brand-surface))",
+          elevated: "hsl(var(--brand-elevated))",
         },
-        // Neutral scale
-        white: "hsl(var(--white))",
-        "off-white": "hsl(var(--off-white))",
-        "light-gray": "hsl(var(--light-gray))",
-        "medium-gray": "hsl(var(--medium-gray))",
-        "dark-gray": "hsl(var(--dark-gray))",
-        charcoal: "hsl(var(--charcoal))",
-        "near-black": "hsl(var(--near-black))",
+        // State colors
+        state: {
+          hover: "hsl(var(--state-hover))",
+          active: "hsl(var(--state-active))",
+        },
       },
       backgroundImage: {
-        "brand-gradient": "linear-gradient(135deg, hsl(var(--brand-red)) 0%, hsl(var(--brand-orange)) 100%)",
+        "brand-gradient": "linear-gradient(135deg, hsl(var(--brand-primary)) 0%, hsl(var(--brand-accent)) 100%)",
       },
       spacing: {
         xs: "4px",
