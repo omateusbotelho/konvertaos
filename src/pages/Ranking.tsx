@@ -3,7 +3,7 @@ import { AppLayout } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { KonvertaAvatar } from "@/components/ui/konverta-avatar";
-import { Trophy, Target, CheckCircle2, Users, TrendingUp, TrendingDown } from "lucide-react";
+import { Trophy, Target, CheckCircle2, Users, TrendingUp, TrendingDown, Lock } from "lucide-react";
 import { useRanking, useMeuDesempenho } from "@/hooks/useRanking";
 import { useAuth } from "@/hooks/use-auth";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -18,10 +18,11 @@ const SETORES = [
 ];
 
 export default function Ranking() {
-  const { profile } = useAuth();
+  const { profile, isAdmin } = useAuth();
   const [mes, setMes] = useState(new Date());
   const [setor, setSetor] = useState<string | undefined>(undefined);
 
+  // Apenas admins podem ver o ranking completo
   const { data: ranking, isLoading: rankingLoading } = useRanking(mes, setor);
   const { data: meuDesempenho, isLoading: desempenhoLoading } = useMeuDesempenho();
 
@@ -52,33 +53,37 @@ export default function Ranking() {
       <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <h1 className="text-2xl font-bold">Ranking - {format(mes, "MMMM yyyy", { locale: ptBR })}</h1>
-          <div className="flex gap-2">
-            <Select value={mes.toISOString()} onValueChange={(v) => setMes(new Date(v))}>
-              <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Selecione o mês" />
-              </SelectTrigger>
-              <SelectContent>
-                {mesesDisponiveis.map((m) => (
-                  <SelectItem key={m.value} value={m.value}>
-                    {m.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={setor || profile?.setor || ''} onValueChange={(v) => setSetor(v || undefined)}>
-              <SelectTrigger className="w-[160px]">
-                <SelectValue placeholder="Setor" />
-              </SelectTrigger>
-              <SelectContent>
-                {SETORES.map((s) => (
-                  <SelectItem key={s.value} value={s.value}>
-                    {s.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <h1 className="text-2xl font-bold">
+            {isAdmin ? `Ranking - ${format(mes, "MMMM yyyy", { locale: ptBR })}` : 'Meu Desempenho'}
+          </h1>
+          {isAdmin && (
+            <div className="flex gap-2">
+              <Select value={mes.toISOString()} onValueChange={(v) => setMes(new Date(v))}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="Selecione o mês" />
+                </SelectTrigger>
+                <SelectContent>
+                  {mesesDisponiveis.map((m) => (
+                    <SelectItem key={m.value} value={m.value}>
+                      {m.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={setor || profile?.setor || ''} onValueChange={(v) => setSetor(v || undefined)}>
+                <SelectTrigger className="w-[160px]">
+                  <SelectValue placeholder="Setor" />
+                </SelectTrigger>
+                <SelectContent>
+                  {SETORES.map((s) => (
+                    <SelectItem key={s.value} value={s.value}>
+                      {s.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
         </div>
 
         {/* Meu Desempenho */}
@@ -155,86 +160,108 @@ export default function Ranking() {
           </CardContent>
         </Card>
 
-        {/* Ranking do Setor */}
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              Ranking do Setor: {SETORES.find(s => s.value === (setor || profile?.setor))?.label}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {rankingLoading ? (
-              <div className="space-y-4">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <Skeleton key={i} className="h-16 w-full" />
-                ))}
-              </div>
-            ) : ranking?.length === 0 ? (
-              <p className="text-center text-muted-foreground py-8">
-                Nenhum dado de ranking disponível para este período.
-              </p>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b text-left">
-                      <th className="pb-3 font-medium text-muted-foreground w-12">#</th>
-                      <th className="pb-3 font-medium text-muted-foreground">Colaborador</th>
-                      <th className="pb-3 font-medium text-muted-foreground text-center">Tarefas</th>
-                      <th className="pb-3 font-medium text-muted-foreground text-center">No Prazo</th>
-                      <th className="pb-3 font-medium text-muted-foreground text-center">Clientes</th>
-                      <th className="pb-3 font-medium text-muted-foreground">Pontuação</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {ranking?.map((item, index) => (
-                      <tr 
-                        key={item.id} 
-                        className={`border-b last:border-0 ${item.id === profile?.id ? 'bg-primary/5' : ''}`}
-                      >
-                        <td className="py-4 text-lg font-semibold">
-                          {getMedalha(index)}
-                        </td>
-                        <td className="py-4">
-                          <div className="flex items-center gap-3">
-                            <KonvertaAvatar
-                              src={item.avatar_url}
-                              name={item.nome}
-                              size="sm"
-                            />
-                            <span className="font-medium">{item.nome}</span>
-                          </div>
-                        </td>
-                        <td className="py-4 text-center font-medium">
-                          {item.tarefas_concluidas}
-                        </td>
-                        <td className="py-4 text-center">
-                          <span className={`font-medium ${item.taxa_prazo >= 90 ? 'text-green-600' : item.taxa_prazo >= 70 ? 'text-yellow-600' : 'text-red-600'}`}>
-                            {item.taxa_prazo}%
-                          </span>
-                        </td>
-                        <td className="py-4 text-center font-medium">
-                          {item.clientes_atendidos}
-                        </td>
-                        <td className="py-4">
-                          <div className="flex items-center gap-2">
-                            <div className="flex-1 bg-muted rounded-full h-2 max-w-[100px]">
-                              <div 
-                                className="bg-primary rounded-full h-2 transition-all"
-                                style={{ width: `${Math.min(100, (item.pontuacao / (ranking[0]?.pontuacao || 1)) * 100)}%` }}
-                              />
-                            </div>
-                            <span className="font-bold text-sm w-8">{item.pontuacao}</span>
-                          </div>
-                        </td>
+        {/* Ranking do Setor - Apenas para Admins */}
+        {isAdmin ? (
+          <Card>
+            <CardHeader>
+              <CardTitle>
+                Ranking do Setor: {SETORES.find(s => s.value === (setor || profile?.setor))?.label}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {rankingLoading ? (
+                <div className="space-y-4">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <Skeleton key={i} className="h-16 w-full" />
+                  ))}
+                </div>
+              ) : ranking?.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">
+                  Nenhum dado de ranking disponível para este período.
+                </p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b text-left">
+                        <th className="pb-3 font-medium text-muted-foreground w-12">#</th>
+                        <th className="pb-3 font-medium text-muted-foreground">Colaborador</th>
+                        <th className="pb-3 font-medium text-muted-foreground text-center">Tarefas</th>
+                        <th className="pb-3 font-medium text-muted-foreground text-center">No Prazo</th>
+                        <th className="pb-3 font-medium text-muted-foreground text-center">Clientes</th>
+                        <th className="pb-3 font-medium text-muted-foreground">Pontuação</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {ranking?.map((item, index) => (
+                        <tr 
+                          key={item.id} 
+                          className={`border-b last:border-0 ${item.id === profile?.id ? 'bg-primary/5' : ''}`}
+                        >
+                          <td className="py-4 text-lg font-semibold">
+                            {getMedalha(index)}
+                          </td>
+                          <td className="py-4">
+                            <div className="flex items-center gap-3">
+                              <KonvertaAvatar
+                                src={item.avatar_url}
+                                name={item.nome}
+                                size="sm"
+                              />
+                              <span className="font-medium">{item.nome}</span>
+                            </div>
+                          </td>
+                          <td className="py-4 text-center font-medium">
+                            {item.tarefas_concluidas}
+                          </td>
+                          <td className="py-4 text-center">
+                            <span className={`font-medium ${item.taxa_prazo >= 90 ? 'text-green-600' : item.taxa_prazo >= 70 ? 'text-yellow-600' : 'text-red-600'}`}>
+                              {item.taxa_prazo}%
+                            </span>
+                          </td>
+                          <td className="py-4 text-center font-medium">
+                            {item.clientes_atendidos}
+                          </td>
+                          <td className="py-4">
+                            <div className="flex items-center gap-2">
+                              <div className="flex-1 bg-muted rounded-full h-2 max-w-[100px]">
+                                <div 
+                                  className="bg-primary rounded-full h-2 transition-all"
+                                  style={{ width: `${Math.min(100, (item.pontuacao / (ranking[0]?.pontuacao || 1)) * 100)}%` }}
+                                />
+                              </div>
+                              <span className="font-bold text-sm w-8">{item.pontuacao}</span>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        ) : (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Lock className="h-5 w-5 text-muted-foreground" />
+                Ranking do Setor
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-8">
+                <Lock className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
+                <p className="text-muted-foreground">
+                  O ranking completo do setor está disponível apenas para administradores.
+                </p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Você pode visualizar seu desempenho individual acima.
+                </p>
               </div>
-            )}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
 
         <p className="text-sm text-muted-foreground text-center">
           O ranking não exibe comissões ou valores financeiros.
