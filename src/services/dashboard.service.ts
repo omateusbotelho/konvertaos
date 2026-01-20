@@ -34,11 +34,25 @@ export interface SDRDashboardData {
   metaAgendamentos: { current: number; target: number };
 }
 
+export interface WinRateByOrigem {
+  origem: string;
+  total: number;
+  ganhos: number;
+  taxa: number;
+}
+
 export interface CloserDashboardData {
   reunioesHoje: StatData;
   propostasPendentes: StatData;
   fechamentosMes: StatData;
   comissaoAcumulada: StatData;
+  // Métricas avançadas
+  taxaConversao: StatData;
+  ticketMedio: StatData;
+  tempoCicloMedio: StatData;
+  forecastMensal: StatData;
+  winRatePorOrigem: WinRateByOrigem[];
+  evolucaoMensal: ChartDataPoint[];
   propostasSemResposta: ListItem[];
   proximasReunioes: ListItem[];
 }
@@ -439,6 +453,15 @@ export async function fetchCloserDashboard(userId: string): Promise<CloserDashbo
   const mesAnterior = getMonthRange(subMonths(now, 1));
   const hoje = getTodayRange();
 
+  // Buscar dados dos últimos 6 meses para evolução
+  const ultimos6Meses = Array.from({ length: 6 }, (_, i) => {
+    const date = subMonths(now, 5 - i);
+    return {
+      mes: date.toLocaleDateString("pt-BR", { month: "short" }),
+      range: getMonthRange(date),
+    };
+  });
+
   const [
     reunioesHojeAtual,
     reunioesHojeAnterior,
@@ -450,6 +473,15 @@ export async function fetchCloserDashboard(userId: string): Promise<CloserDashbo
     comissaoAnterior,
     propostasSemResposta,
     proximasReunioes,
+    // Dados para métricas avançadas
+    leadsConvertidosMesAtual,
+    leadsConvertidosMesAnterior,
+    totalLeadsRecebidosMesAtual,
+    totalLeadsRecebidosMesAnterior,
+    leadsPerdidosMesAtual,
+    leadsEmNegociacao,
+    leadsComOrigemMes,
+    evolucaoMensalData,
   ] = await Promise.all([
     // Reuniões hoje
     supabase
@@ -538,10 +570,176 @@ export async function fetchCloserDashboard(userId: string): Promise<CloserDashbo
       .eq("status", "agendada")
       .order("data_inicio", { ascending: true })
       .limit(5),
+    // === MÉTRICAS AVANÇADAS ===
+    // Leads convertidos mês atual (com valor para ticket médio e tempo ciclo)
+    supabase
+      .from("leads")
+      .select("id, valor_proposta, created_at, data_conversao")
+      .eq("closer_responsavel_id", userId)
+      .eq("etapa_closer", "fechado_ganho")
+      .gte("data_conversao", mesAtual.start)
+      .lte("data_conversao", mesAtual.end),
+    // Leads convertidos mês anterior (para variação)
+    supabase
+      .from("leads")
+      .select("id, valor_proposta, created_at, data_conversao")
+      .eq("closer_responsavel_id", userId)
+      .eq("etapa_closer", "fechado_ganho")
+      .gte("data_conversao", mesAnterior.start)
+      .lte("data_conversao", mesAnterior.end),
+    // Total leads recebidos mês atual (para taxa conversão)
+    supabase
+      .from("leads")
+      .select("id", { count: "exact", head: true })
+      .eq("closer_responsavel_id", userId)
+      .eq("funil_atual", "closer")
+      .or(`etapa_closer.eq.fechado_ganho,etapa_closer.eq.perdido,etapa_closer.neq.null`)
+      .gte("created_at", mesAtual.start)
+      .lte("created_at", mesAtual.end),
+    // Total leads recebidos mês anterior
+    supabase
+      .from("leads")
+      .select("id", { count: "exact", head: true })
+      .eq("closer_responsavel_id", userId)
+      .eq("funil_atual", "closer")
+      .or(`etapa_closer.eq.fechado_ganho,etapa_closer.eq.perdido,etapa_closer.neq.null`)
+      .gte("created_at", mesAnterior.start)
+      .lte("created_at", mesAnterior.end),
+    // Leads perdidos mês atual
+    supabase
+      .from("leads")
+      .select("id", { count: "exact", head: true })
+      .eq("closer_responsavel_id", userId)
+      .eq("etapa_closer", "perdido")
+      .gte("data_perda", mesAtual.start)
+      .lte("data_perda", mesAtual.end),
+    // Leads em negociação (para forecast)
+    supabase
+      .from("leads")
+      .select("id, valor_proposta, etapa_closer")
+      .eq("closer_responsavel_id", userId)
+      .eq("funil_atual", "closer")
+      .in("etapa_closer", ["reuniao_realizada", "proposta_enviada", "negociacao"]),
+    // Leads com origem para Win Rate por Origem
+    supabase
+      .from("leads")
+      .select(`
+        id,
+        etapa_closer,
+        origem:origens_lead(nome)
+      `)
+      .eq("closer_responsavel_id", userId)
+      .in("etapa_closer", ["fechado_ganho", "perdido"])
+      .gte("updated_at", subMonths(now, 3).toISOString()),
+    // Evolução mensal (fechamentos e perdas dos últimos 6 meses)
+    Promise.all(
+      ultimos6Meses.map(async ({ mes, range }) => {
+        const [ganhos, perdas] = await Promise.all([
+          supabase
+            .from("leads")
+            .select("id", { count: "exact", head: true })
+            .eq("closer_responsavel_id", userId)
+            .eq("etapa_closer", "fechado_ganho")
+            .gte("data_conversao", range.start)
+            .lte("data_conversao", range.end),
+          supabase
+            .from("leads")
+            .select("id", { count: "exact", head: true })
+            .eq("closer_responsavel_id", userId)
+            .eq("etapa_closer", "perdido")
+            .gte("data_perda", range.start)
+            .lte("data_perda", range.end),
+        ]);
+        return {
+          name: mes.charAt(0).toUpperCase() + mes.slice(1).replace(".", ""),
+          value: ganhos.count || 0,
+          value2: perdas.count || 0,
+        };
+      })
+    ),
   ]);
 
   const comissaoAtualSum = (comissaoAtual.data || []).reduce((sum, c) => sum + (c.valor || 0), 0);
   const comissaoAnteriorSum = (comissaoAnterior.data || []).reduce((sum, c) => sum + (c.valor || 0), 0);
+
+  // Calcular métricas avançadas
+  const leadsConvertidosAtualData = leadsConvertidosMesAtual.data || [];
+  const leadsConvertidosAnteriorData = leadsConvertidosMesAnterior.data || [];
+  
+  // Taxa de Conversão = Ganhos / (Ganhos + Perdidos)
+  const ganhosAtual = fechamentosAtual.count || 0;
+  const perdidosAtual = leadsPerdidosMesAtual.count || 0;
+  const totalFinalizadosAtual = ganhosAtual + perdidosAtual;
+  const taxaConversaoAtual = totalFinalizadosAtual > 0 ? (ganhosAtual / totalFinalizadosAtual) * 100 : 0;
+  
+  const ganhosAnterior = fechamentosAnterior.count || 0;
+  const totalRecebidosAnterior = totalLeadsRecebidosMesAnterior.count || 0;
+  const taxaConversaoAnterior = totalRecebidosAnterior > 0 ? (ganhosAnterior / totalRecebidosAnterior) * 100 : 0;
+  
+  // Ticket Médio
+  const somaValoresAtual = leadsConvertidosAtualData.reduce((sum, l) => sum + (l.valor_proposta || 0), 0);
+  const ticketMedioAtual = leadsConvertidosAtualData.length > 0 ? somaValoresAtual / leadsConvertidosAtualData.length : 0;
+  
+  const somaValoresAnterior = leadsConvertidosAnteriorData.reduce((sum, l) => sum + (l.valor_proposta || 0), 0);
+  const ticketMedioAnterior = leadsConvertidosAnteriorData.length > 0 ? somaValoresAnterior / leadsConvertidosAnteriorData.length : 0;
+  
+  // Tempo de Ciclo Médio (dias entre criação e conversão)
+  const temposCicloAtual = leadsConvertidosAtualData
+    .filter(l => l.created_at && l.data_conversao)
+    .map(l => {
+      const inicio = new Date(l.created_at!);
+      const fim = new Date(l.data_conversao!);
+      return Math.floor((fim.getTime() - inicio.getTime()) / (1000 * 60 * 60 * 24));
+    });
+  const tempoCicloMedioAtual = temposCicloAtual.length > 0 
+    ? temposCicloAtual.reduce((sum, t) => sum + t, 0) / temposCicloAtual.length 
+    : 0;
+  
+  const temposCicloAnterior = leadsConvertidosAnteriorData
+    .filter(l => l.created_at && l.data_conversao)
+    .map(l => {
+      const inicio = new Date(l.created_at!);
+      const fim = new Date(l.data_conversao!);
+      return Math.floor((fim.getTime() - inicio.getTime()) / (1000 * 60 * 60 * 24));
+    });
+  const tempoCicloMedioAnterior = temposCicloAnterior.length > 0 
+    ? temposCicloAnterior.reduce((sum, t) => sum + t, 0) / temposCicloAnterior.length 
+    : 0;
+  
+  // Forecast Mensal (valor potencial ponderado por etapa)
+  const pesosPorEtapa: Record<string, number> = {
+    reuniao_realizada: 0.3,
+    proposta_enviada: 0.5,
+    negociacao: 0.7,
+  };
+  const forecastAtual = (leadsEmNegociacao.data || []).reduce((sum, l) => {
+    const peso = pesosPorEtapa[l.etapa_closer || ""] || 0.3;
+    return sum + (l.valor_proposta || 0) * peso;
+  }, 0);
+  
+  // Win Rate por Origem
+  const leadsOrigemData = leadsComOrigemMes.data || [];
+  const origemStats: Record<string, { total: number; ganhos: number }> = {};
+  leadsOrigemData.forEach(l => {
+    const origemNome = (l.origem as any)?.nome || "Sem origem";
+    if (!origemStats[origemNome]) {
+      origemStats[origemNome] = { total: 0, ganhos: 0 };
+    }
+    origemStats[origemNome].total++;
+    if (l.etapa_closer === "fechado_ganho") {
+      origemStats[origemNome].ganhos++;
+    }
+  });
+  
+  const winRatePorOrigem: WinRateByOrigem[] = Object.entries(origemStats)
+    .map(([origem, stats]) => ({
+      origem,
+      total: stats.total,
+      ganhos: stats.ganhos,
+      taxa: stats.total > 0 ? Math.round((stats.ganhos / stats.total) * 100) : 0,
+    }))
+    .sort((a, b) => b.taxa - a.taxa)
+    .slice(0, 5);
 
   return {
     reunioesHoje: {
@@ -561,6 +759,28 @@ export async function fetchCloserDashboard(userId: string): Promise<CloserDashbo
       variacao: calcVariacao(comissaoAtualSum, comissaoAnteriorSum),
       prefix: "R$ ",
     },
+    // Métricas avançadas
+    taxaConversao: {
+      valor: Math.round(taxaConversaoAtual * 10) / 10,
+      variacao: calcVariacao(taxaConversaoAtual, taxaConversaoAnterior),
+      suffix: "%",
+    },
+    ticketMedio: {
+      valor: Math.round(ticketMedioAtual),
+      variacao: calcVariacao(ticketMedioAtual, ticketMedioAnterior),
+      prefix: "R$ ",
+    },
+    tempoCicloMedio: {
+      valor: Math.round(tempoCicloMedioAtual),
+      variacao: calcVariacao(tempoCicloMedioAnterior, tempoCicloMedioAtual), // Invertido: menos é melhor
+      suffix: " dias",
+    },
+    forecastMensal: {
+      valor: Math.round(forecastAtual),
+      prefix: "R$ ",
+    },
+    winRatePorOrigem,
+    evolucaoMensal: evolucaoMensalData,
     propostasSemResposta: (propostasSemResposta.data || []).map((p) => {
       const horas = Math.floor((now.getTime() - new Date(p.updated_at).getTime()) / (1000 * 60 * 60));
       return {
