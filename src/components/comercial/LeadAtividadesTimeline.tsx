@@ -14,6 +14,7 @@ import {
   Clock,
   Filter,
   X,
+  Plus,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -23,11 +24,13 @@ import {
   ATIVIDADE_TIPOS,
 } from "@/hooks/useLeadAtividades";
 import { Database } from "@/integrations/supabase/types";
+import { ModalNovaAtividade } from "./ModalNovaAtividade";
 
 type AtividadeTipo = Database["public"]["Enums"]["atividade_tipo"];
 
 interface LeadAtividadesTimelineProps {
   leadId: string | null;
+  leadNome?: string;
 }
 
 // Ícones e cores por tipo de atividade
@@ -62,8 +65,9 @@ const ATIVIDADE_CONFIG: Record<
   },
 };
 
-export function LeadAtividadesTimeline({ leadId }: LeadAtividadesTimelineProps) {
+export function LeadAtividadesTimeline({ leadId, leadNome }: LeadAtividadesTimelineProps) {
   const [tipoFilter, setTipoFilter] = useState<AtividadeTipo | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
   const { data: atividades, isLoading } = useLeadAtividades({
     leadId,
     tipoFilter,
@@ -79,23 +83,45 @@ export function LeadAtividadesTimeline({ leadId }: LeadAtividadesTimelineProps) 
 
   return (
     <div className="flex flex-col h-full">
-      {/* Filtros */}
+      {/* Modal de Nova Atividade */}
+      {leadId && (
+        <ModalNovaAtividade
+          open={modalOpen}
+          onOpenChange={setModalOpen}
+          leadId={leadId}
+          leadNome={leadNome}
+        />
+      )}
+
+      {/* Header com botão de adicionar */}
       <div className="px-6 py-3 border-b border-border/20">
-        <div className="flex items-center gap-2 mb-2">
-          <Filter className="w-3.5 h-3.5 text-muted-foreground" />
-          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-            Filtrar por tipo
-          </span>
-          {tipoFilter && (
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <Filter className="w-3.5 h-3.5 text-muted-foreground" />
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              Filtrar por tipo
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            {tipoFilter && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-5 w-5"
+                onClick={clearFilter}
+              >
+                <X className="w-3 h-3" />
+              </Button>
+            )}
             <Button
-              variant="ghost"
-              size="icon"
-              className="h-5 w-5 ml-auto"
-              onClick={clearFilter}
+              size="sm"
+              className="h-7 text-xs gap-1"
+              onClick={() => setModalOpen(true)}
             >
-              <X className="w-3 h-3" />
+              <Plus className="w-3 h-3" />
+              Registrar
             </Button>
-          )}
+          </div>
         </div>
         <div className="flex flex-wrap gap-1.5">
           {ATIVIDADE_TIPOS.map((tipo) => {
