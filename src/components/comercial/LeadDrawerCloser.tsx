@@ -21,20 +21,14 @@ import {
   Clock,
   User,
   Calendar,
-  MessageCircle,
-  PhoneCall,
   FileText,
-  Video,
-  Plus,
   CheckCircle2,
-  Circle,
-  AlertCircle,
-  ArrowRight,
   DollarSign,
-  Download,
   RefreshCw,
+  History,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { LeadAtividadesTimeline } from "./LeadAtividadesTimeline";
 
 interface LeadDrawerCloserProps {
   open: boolean;
@@ -117,6 +111,10 @@ export function LeadDrawerCloser({
           <TabsList className="w-full justify-start rounded-none border-b border-border/20 bg-transparent px-6 flex-wrap h-auto py-1">
             <TabsTrigger value="info" className="data-[state=active]:bg-transparent text-xs">
               Info
+            </TabsTrigger>
+            <TabsTrigger value="historico" className="data-[state=active]:bg-transparent text-xs gap-1">
+              <History className="w-3 h-3" />
+              Histórico
             </TabsTrigger>
             <TabsTrigger value="proposta" className="data-[state=active]:bg-transparent text-xs">
               Proposta
@@ -220,6 +218,11 @@ export function LeadDrawerCloser({
                 )}
               </div>
             </ScrollArea>
+          </TabsContent>
+
+          {/* Tab: Histórico de Atividades */}
+          <TabsContent value="historico" className="flex-1 overflow-auto m-0">
+            <LeadAtividadesTimeline leadId={lead.id} />
           </TabsContent>
 
           {/* Tab: Proposta */}
