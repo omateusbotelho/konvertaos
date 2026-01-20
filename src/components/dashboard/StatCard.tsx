@@ -46,7 +46,7 @@ export function StatCard({
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <p className="text-sm text-muted-foreground">{label}</p>
-          <p className="text-2xl font-semibold text-foreground mt-1">
+          <p className="text-2xl font-semibold text-foreground mt-1 font-display">
             {prefix}{typeof value === "number" ? value.toLocaleString("pt-BR") : value}{suffix}
           </p>
         </div>
