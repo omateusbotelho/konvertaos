@@ -1,5 +1,5 @@
-/* Inter Font */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+/* Lexend Font */
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -8,94 +8,92 @@
 @layer base {
   :root {
     /* 
-     * Konverta Dark Mode Palette
-     * #0B2D5B, #4B3FFF, #1F7BFF, #7C8CFF, #141414, #F4F4F4, #2A2A2A, #6B7280
+     * Konverta Brand Identity
+     * Primary: #DF2E17 (Red-Orange)
+     * Dark: #070808, #272727
+     * Light: #F9F9F9
+     * Gradient: Red to Orange
      */
     
-    /* Backgrounds - #141414 */
-    --background: 0 0% 8%;
-    --background-secondary: 0 0% 10%;
+    /* Backgrounds - #070808 */
+    --background: 0 2% 3%;
+    --background-secondary: 0 0% 15%;
     
-    /* Foreground - #F4F4F4 */
-    --foreground: 0 0% 96%;
+    /* Foreground - #F9F9F9 */
+    --foreground: 0 0% 98%;
 
-    /* Cards - #2A2A2A */
-    --card: 0 0% 16%;
-    --card-foreground: 0 0% 96%;
+    /* Cards - #272727 */
+    --card: 0 0% 15%;
+    --card-foreground: 0 0% 98%;
 
     /* Popovers */
-    --popover: 0 0% 16%;
-    --popover-foreground: 0 0% 96%;
+    --popover: 0 0% 15%;
+    --popover-foreground: 0 0% 98%;
 
-    /* Primary - #4B3FFF */
-    --primary: 244 100% 62%;
+    /* Primary - #DF2E17 */
+    --primary: 6 82% 48%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary - #7C8CFF */
-    --secondary: 233 100% 74%;
+    /* Secondary - Darker Red */
+    --secondary: 6 70% 38%;
     --secondary-foreground: 0 0% 100%;
 
-    /* Muted - #6B7280 */
-    --muted: 220 9% 46%;
-    --muted-foreground: 220 9% 60%;
+    /* Muted - #272727 */
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 65%;
 
-    /* Accent - #1F7BFF */
-    --accent: 215 100% 56%;
+    /* Accent - Orange gradient end */
+    --accent: 25 95% 53%;
     --accent-foreground: 0 0% 100%;
 
     /* Destructive */
-    --destructive: 0 84% 60%;
+    --destructive: 0 84% 50%;
     --destructive-foreground: 0 0% 100%;
 
     /* Success */
-    --success: 160 84% 39%;
+    --success: 142 76% 36%;
     --success-foreground: 0 0% 100%;
 
     /* Warning */
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 0%;
 
-    /* Info - #1F7BFF */
-    --info: 215 100% 56%;
+    /* Info */
+    --info: 25 95% 53%;
     --info-foreground: 0 0% 100%;
 
     /* Border */
-    --border: 220 9% 30%;
-    --input: 0 0% 16%;
-    --ring: 244 100% 62%;
+    --border: 0 0% 20%;
+    --input: 0 0% 15%;
+    --ring: 6 82% 48%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
     /* Sidebar */
-    --sidebar-background: 0 0% 6%;
-    --sidebar-foreground: 0 0% 96%;
-    --sidebar-primary: 244 100% 62%;
+    --sidebar-background: 0 2% 3%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 6 82% 48%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 16%;
-    --sidebar-accent-foreground: 0 0% 96%;
-    --sidebar-border: 220 9% 30%;
-    --sidebar-ring: 244 100% 62%;
+    --sidebar-accent: 0 0% 15%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 0 0% 20%;
+    --sidebar-ring: 6 82% 48%;
 
-    /* Grays */
-    --gray-dark: 220 9% 30%;
-    --gray-medium: 220 9% 46%;
-    --gray-light: 0 0% 96%;
-    
-    /* Palette reference colors */
-    --navy: 215 78% 20%;
-    --violet: 244 100% 62%;
-    --blue: 215 100% 56%;
-    --lavender: 233 100% 74%;
+    /* Brand Colors */
+    --brand-red: 6 82% 48%;
+    --brand-orange: 25 95% 53%;
+    --brand-dark: 0 2% 3%;
+    --brand-gray: 0 0% 15%;
+    --brand-light: 0 0% 98%;
     
     /* Neutral scale */
     --white: 0 0% 100%;
-    --off-white: 60 10% 96%;
-    --cream: 60 14% 93%;
-    --warm-gray-light: 60 6% 88%;
-    --warm-gray: 60 5% 83%;
-    --charcoal: 203 8% 20%;
-    --dark-warm: 45 8% 20%;
-    --slate: 218 5% 44%;
+    --off-white: 0 0% 98%;
+    --light-gray: 0 0% 95%;
+    --medium-gray: 0 0% 45%;
+    --dark-gray: 0 0% 15%;
+    --charcoal: 0 0% 10%;
+    --near-black: 0 2% 3%;
   }
 }
 
