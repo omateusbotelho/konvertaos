@@ -3,6 +3,9 @@ project_id = "sdlmormyybgzqntquoir"
 [functions.create-admin]
 verify_jwt = false
 
+[functions.create-user]
+verify_jwt = false
+
 [functions.nps-send-scheduled]
 verify_jwt = false
 
