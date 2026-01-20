@@ -486,6 +486,30 @@ export function useUpdateAusenciaStatus() {
   });
 }
 
+export function useCancelarAusencia() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('ausencias')
+        .delete()
+        .eq('id', id)
+        .eq('status', 'pendente');
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ausencias'] });
+      queryClient.invalidateQueries({ queryKey: ['minhas-ausencias'] });
+      toast.success('Solicitação cancelada com sucesso!');
+    },
+    onError: (error) => {
+      toast.error('Erro ao cancelar solicitação: ' + error.message);
+    },
+  });
+}
+
 // Cores por tipo de reunião
 export const coresReuniao: Record<string, string> = {
   weekly: 'bg-blue-500',
