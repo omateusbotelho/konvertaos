@@ -84,6 +84,7 @@ const ETAPAS_CLOSER: EtapaCloser[] = [
   "proposta_enviada",
   "negociacao",
   "fechado_ganho",
+  "no_show",
   "perdido",
 ];
 

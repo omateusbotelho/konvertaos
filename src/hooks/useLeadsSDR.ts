@@ -71,6 +71,7 @@ const ETAPAS_SDR: EtapaSDR[] = [
   "contato_realizado",
   "qualificado",
   "reuniao_agendada",
+  "no_show",
   "perdido",
 ];
 
@@ -271,6 +272,81 @@ export function useLeadsCount() {
       if (error) throw error;
       return count || 0;
     },
+  });
+}
+
+// Hook to fetch leads that are no_show in the closer pipeline (for SDR visibility)
+export function useNoShowLeadsFromCloser() {
+  const { user } = useAuth();
+
+  return useQuery<LeadSDR[], SupabaseError>({
+    queryKey: ["leads-closer-noshow"],
+    queryFn: async (): Promise<LeadSDR[]> => {
+      const { data, error } = await supabase
+        .from("leads")
+        .select(`
+          *,
+          origens_lead:origem_id(nome),
+          servicos:servico_interesse_id(nome),
+          follow_ups!follow_ups_lead_id_fkey(
+            data_programada,
+            descricao,
+            concluido
+          ),
+          atividades_lead!atividades_lead_lead_id_fkey(
+            data_atividade
+          )
+        `)
+        .eq("funil_atual", "closer")
+        .eq("etapa_closer", "no_show")
+        .order("updated_at", { ascending: false });
+
+      if (error) throw error;
+
+      return ((data || []) as LeadSDRQueryResult[]).map((lead) => {
+        const pendingFollowUps = (lead.follow_ups || [])
+          .filter((fu) => !fu.concluido)
+          .sort((a, b) =>
+            new Date(a.data_programada).getTime() - new Date(b.data_programada).getTime()
+          );
+
+        const nextFollowUp = pendingFollowUps[0];
+
+        const atividades = (lead.atividades_lead || [])
+          .map((a) => (a.data_atividade ? new Date(a.data_atividade) : null))
+          .filter((d): d is Date => d !== null)
+          .sort((a, b) => b.getTime() - a.getTime());
+
+        const ultimaAtividade = atividades[0];
+
+        return {
+          id: lead.id,
+          nome: lead.nome,
+          empresa: lead.empresa,
+          telefone: lead.telefone,
+          email: lead.email,
+          origem_id: lead.origem_id,
+          servico_interesse_id: lead.servico_interesse_id,
+          etapa_sdr: "no_show" as EtapaSDR, // Mark as no_show for SDR view
+          funil_atual: lead.funil_atual,
+          created_at: lead.created_at,
+          updated_at: lead.updated_at,
+          observacoes: lead.observacoes,
+          sdr_responsavel_id: lead.sdr_responsavel_id,
+          origem_nome: lead.origens_lead?.nome,
+          servico_nome: lead.servicos?.nome,
+          follow_up: nextFollowUp
+            ? {
+                data: new Date(nextFollowUp.data_programada),
+                descricao: nextFollowUp.descricao || undefined,
+              }
+            : undefined,
+          ultima_atividade: ultimaAtividade,
+        };
+      });
+    },
+    enabled: !!user,
+    staleTime: 2 * 60 * 1000,
   });
 }
 
