@@ -58,8 +58,9 @@ const adminNavItems = [
   { title: "Contratos", href: "/contratos", icon: FileText },
 ];
 
-const bottomNavItems = [
-  { title: "Configurações", href: "/configuracoes", icon: Settings },
+// Configurações só para admin - removido do menu para não-admins
+const bottomNavItems: { title: string; href: string; icon: typeof Settings; adminOnly?: boolean }[] = [
+  { title: "Configurações", href: "/configuracoes", icon: Settings, adminOnly: true },
 ];
 
 export function AppSidebar() {
@@ -183,27 +184,30 @@ export function AppSidebar() {
             </div>
           )}
 
-          <div className="mt-6 pt-6 border-t border-border/20">
-            <ul className="space-y-1">
-              {bottomNavItems.map((item) => (
-                <li key={item.href}>
-                  <NavLink
-                    to={item.href}
-                    onClick={closeMobile}
-                    className={cn(
-                      "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-150",
-                      isActive(item.href)
-                        ? "bg-primary/10 text-primary"
-                        : "text-muted-foreground hover:bg-card hover:text-foreground"
-                    )}
-                  >
-                    <item.icon className="h-5 w-5 flex-shrink-0" />
-                    {!isCollapsed && <span>{item.title}</span>}
-                  </NavLink>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {/* Bottom nav items - conditionally rendered */}
+          {isAdmin && (
+            <div className="mt-6 pt-6 border-t border-border/20">
+              <ul className="space-y-1">
+                {bottomNavItems.map((item) => (
+                  <li key={item.href}>
+                    <NavLink
+                      to={item.href}
+                      onClick={closeMobile}
+                      className={cn(
+                        "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-150",
+                        isActive(item.href)
+                          ? "bg-primary/10 text-primary"
+                          : "text-muted-foreground hover:bg-card hover:text-foreground"
+                      )}
+                    >
+                      <item.icon className="h-5 w-5 flex-shrink-0" />
+                      {!isCollapsed && <span>{item.title}</span>}
+                    </NavLink>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </nav>
 
         {/* Collapse button */}
@@ -270,16 +274,18 @@ export function AppSidebar() {
                 <User className="h-4 w-4 mr-2" />
                 Meu Perfil
               </DropdownMenuItem>
-              <DropdownMenuItem
-                className="text-muted-foreground hover:text-foreground cursor-pointer"
-                onClick={() => {
-                  closeMobile();
-                  navigate("/configuracoes");
-                }}
-              >
-                <Settings className="h-4 w-4 mr-2" />
-                Configurações
-              </DropdownMenuItem>
+              {isAdmin && (
+                <DropdownMenuItem
+                  className="text-muted-foreground hover:text-foreground cursor-pointer"
+                  onClick={() => {
+                    closeMobile();
+                    navigate("/configuracoes");
+                  }}
+                >
+                  <Settings className="h-4 w-4 mr-2" />
+                  Configurações
+                </DropdownMenuItem>
+              )}
               <DropdownMenuSeparator className="bg-border/20" />
               <DropdownMenuItem
                 className="text-destructive hover:text-destructive cursor-pointer"
