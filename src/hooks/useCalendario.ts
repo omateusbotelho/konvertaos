@@ -230,17 +230,27 @@ export function useCreateReuniao() {
       cliente_id?: string;
       lead_id?: string;
       recorrente?: boolean;
+      recorrencia_config?: Record<string, unknown> | null;
       participantes: string[];
     }) => {
-      const { participantes, tipo, ...reuniaoData } = dados;
+      const { participantes, tipo, recorrencia_config, ...reuniaoData } = dados;
 
       const { data: reuniao, error: reuniaoError } = await supabase
         .from('reunioes')
-        .insert({
-          ...reuniaoData,
+        .insert([{
+          titulo: reuniaoData.titulo,
+          descricao: reuniaoData.descricao,
+          data_inicio: reuniaoData.data_inicio,
+          data_fim: reuniaoData.data_fim,
+          local: reuniaoData.local,
+          projeto_id: reuniaoData.projeto_id,
+          cliente_id: reuniaoData.cliente_id,
+          lead_id: reuniaoData.lead_id,
+          recorrente: reuniaoData.recorrente,
+          recorrencia_config: recorrencia_config as unknown as null,
           tipo: tipo as 'weekly' | '1:1' | 'projeto' | 'cliente' | 'outro',
           organizador_id: user!.id,
-        })
+        }])
         .select()
         .single();
 
