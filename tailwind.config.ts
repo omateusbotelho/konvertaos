@@ -86,6 +86,15 @@ export default {
         violet: "hsl(var(--violet))",
         blue: "hsl(var(--blue))",
         lavender: "hsl(var(--lavender))",
+        // Neutral scale
+        white: "hsl(var(--white))",
+        "off-white": "hsl(var(--off-white))",
+        cream: "hsl(var(--cream))",
+        "warm-gray-light": "hsl(var(--warm-gray-light))",
+        "warm-gray": "hsl(var(--warm-gray))",
+        charcoal: "hsl(var(--charcoal))",
+        "dark-warm": "hsl(var(--dark-warm))",
+        slate: "hsl(var(--slate))",
       },
       spacing: {
         xs: "4px",

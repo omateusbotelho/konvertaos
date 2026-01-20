@@ -86,6 +86,16 @@
     --violet: 244 100% 62%;
     --blue: 215 100% 56%;
     --lavender: 233 100% 74%;
+    
+    /* Neutral scale */
+    --white: 0 0% 100%;
+    --off-white: 60 10% 96%;
+    --cream: 60 14% 93%;
+    --warm-gray-light: 60 6% 88%;
+    --warm-gray: 60 5% 83%;
+    --charcoal: 203 8% 20%;
+    --dark-warm: 45 8% 20%;
+    --slate: 218 5% 44%;
   }
 }
 
