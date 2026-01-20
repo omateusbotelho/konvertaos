@@ -167,7 +167,7 @@ export function ModalAgendamento({
                           <SelectValue placeholder="Selecione" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent className="max-h-[200px]">
+                      <SelectContent position="popper" className="z-[200] max-h-[200px]">
                         {HORARIOS.map((horario) => (
                           <SelectItem key={horario} value={horario}>
                             {horario}
@@ -193,7 +193,7 @@ export function ModalAgendamento({
                         <SelectValue placeholder="Selecione o closer" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent>
+                    <SelectContent position="popper" className="z-[200]">
                       {closers.map((closer) => (
                         <SelectItem key={closer.id} value={closer.id}>
                           {closer.nome}

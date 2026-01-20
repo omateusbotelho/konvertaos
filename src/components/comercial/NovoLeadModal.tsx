@@ -171,7 +171,7 @@ export function NovoLeadModal({
                         <SelectValue placeholder="Selecione a origem" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent>
+                    <SelectContent position="popper" className="z-[200]">
                       {origens.map((origem) => (
                         <SelectItem key={origem.id} value={origem.id}>
                           {origem.nome}
@@ -196,7 +196,7 @@ export function NovoLeadModal({
                         <SelectValue placeholder="Selecione o serviço" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent>
+                    <SelectContent position="popper" className="z-[200]">
                       {servicos.map((servico) => (
                         <SelectItem key={servico.id} value={servico.id}>
                           {servico.nome}
@@ -241,7 +241,7 @@ export function NovoLeadModal({
                           <SelectValue placeholder="Distribuição automática" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                      <SelectContent position="popper" className="z-[200]">
                         {sdrs.map((sdr) => (
                           <SelectItem key={sdr.id} value={sdr.id}>
                             {sdr.nome}
