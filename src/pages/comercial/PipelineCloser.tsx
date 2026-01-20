@@ -38,6 +38,7 @@ import {
   ModalAtivacaoCliente,
   AgendaRapida,
   LeadDrawerCloser,
+  ModalReagendarReuniao,
 } from "@/components/comercial";
 import type { ClienteData } from "@/components/comercial/ModalAtivacaoCliente";
 import {
@@ -107,6 +108,11 @@ export default function PipelineCloser() {
     open: boolean;
     lead: LeadCloser | null;
   }>({ open: false, lead: null });
+  const [reagendarModal, setReagendarModal] = useState<{
+    open: boolean;
+    leadId: string;
+    leadNome: string;
+  }>({ open: false, leadId: "", leadNome: "" });
   const [drawerLead, setDrawerLead] = useState<LeadCloser | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -233,7 +239,7 @@ export default function PipelineCloser() {
     }
 
     if (targetEtapa === "no_show") {
-      // Move to no_show - simple move with activity log
+      // Move to no_show - simple move with activity log and SDR notification
       updateEtapa.mutate(
         { leadId, etapa: targetEtapa },
         {
@@ -246,6 +252,23 @@ export default function PipelineCloser() {
               realizado_por_id: profile?.id,
               data_atividade: new Date().toISOString(),
             });
+
+            // Create notification for SDR if exists
+            if (lead.sdr_responsavel_id) {
+              await supabase.from("notificacoes").insert({
+                usuario_id: lead.sdr_responsavel_id,
+                tipo: "no_show_lead" as const,
+                titulo: "Lead marcado como No-show",
+                mensagem: `O lead "${lead.nome}" não compareceu à reunião agendada. Considere entrar em contato para reagendar.`,
+                link: `/comercial/pipeline-sdr`,
+                dados: {
+                  lead_id: leadId,
+                  lead_nome: lead.nome,
+                  closer_nome: profile?.nome,
+                },
+              });
+            }
+
             toast.success("Lead marcado como No-show");
             // Invalidate SDR queries so they see this lead
             queryClient.invalidateQueries({ queryKey: ["leads-sdr"] });
@@ -513,6 +536,49 @@ export default function PipelineCloser() {
     setDrawerOpen(true);
   };
 
+  const openReagendarModal = (lead: LeadCloser) => {
+    setReagendarModal({
+      open: true,
+      leadId: lead.id,
+      leadNome: lead.nome,
+    });
+  };
+
+  const handleConfirmReagendar = async (data: {
+    data: Date;
+    horario: string;
+    observacoes?: string;
+  }) => {
+    const [hours, minutes] = data.horario.split(":").map(Number);
+    const dataAgendamento = new Date(data.data);
+    dataAgendamento.setHours(hours, minutes, 0, 0);
+
+    const { error } = await supabase
+      .from("leads")
+      .update({
+        etapa_closer: "reuniao_agendada",
+        data_agendamento: dataAgendamento.toISOString(),
+      })
+      .eq("id", reagendarModal.leadId);
+
+    if (error) {
+      toast.error("Erro ao reagendar reunião");
+      return;
+    }
+
+    // Create activity
+    await supabase.from("atividades_lead").insert({
+      lead_id: reagendarModal.leadId,
+      tipo: "reuniao",
+      descricao: `Reunião reagendada para ${format(dataAgendamento, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}${data.observacoes ? `. ${data.observacoes}` : ""}`,
+      realizado_por_id: profile?.id,
+    });
+
+    toast.success("Reunião reagendada com sucesso!");
+    queryClient.invalidateQueries({ queryKey: ["leads-closer"] });
+    setReagendarModal({ open: false, leadId: "", leadNome: "" });
+  };
+
   const clearFilters = () => {
     setBusca("");
     setSdrId("");
@@ -729,7 +795,9 @@ export default function PipelineCloser() {
                               : undefined
                           }
                           semResposta48h={is48hPending(lead)}
+                          etapaAtual={etapa}
                           onClick={() => openLeadDrawer(lead)}
+                          onReagendar={() => openReagendarModal(lead)}
                         />
                       ))}
                     </KanbanColumn>
@@ -837,6 +905,15 @@ export default function PipelineCloser() {
                 }
               : null
           }
+          onReagendar={drawerLead ? () => openReagendarModal(drawerLead) : undefined}
+        />
+
+        <ModalReagendarReuniao
+          open={reagendarModal.open}
+          onOpenChange={(open) => setReagendarModal((prev) => ({ ...prev, open }))}
+          onConfirm={handleConfirmReagendar}
+          onCancel={() => setReagendarModal({ open: false, leadId: "", leadNome: "" })}
+          leadNome={reagendarModal.leadNome}
         />
       </div>
     </AppLayout>

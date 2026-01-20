@@ -2582,6 +2582,7 @@ export type Database = {
         | "nps_detrator"
         | "contrato_vencendo"
         | "geral"
+        | "no_show_lead"
       tipo_reuniao: "weekly" | "1:1" | "projeto" | "cliente" | "outro"
       tipo_timeline:
         | "criado"
@@ -2811,6 +2812,7 @@ export const Constants = {
         "nps_detrator",
         "contrato_vencendo",
         "geral",
+        "no_show_lead",
       ],
       tipo_reuniao: ["weekly", "1:1", "projeto", "cliente", "outro"],
       tipo_timeline: [
