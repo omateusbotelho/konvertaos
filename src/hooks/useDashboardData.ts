@@ -112,6 +112,12 @@ const emptyCloserData: CloserDashboardData = {
   propostasPendentes: { valor: 0 },
   fechamentosMes: { valor: 0 },
   comissaoAcumulada: { valor: 0, prefix: "R$ " },
+  taxaConversao: { valor: 0, suffix: "%" },
+  ticketMedio: { valor: 0, prefix: "R$ " },
+  tempoCicloMedio: { valor: 0, suffix: " dias" },
+  forecastMensal: { valor: 0, prefix: "R$ " },
+  winRatePorOrigem: [],
+  evolucaoMensal: [],
   propostasSemResposta: [],
   proximasReunioes: [],
 };
