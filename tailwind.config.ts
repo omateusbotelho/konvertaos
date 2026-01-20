@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Inter", "system-ui", "sans-serif"],
-        display: ["Inter", "system-ui", "sans-serif"],
+        sans: ["Lexend", "system-ui", "sans-serif"],
+        display: ["Lexend", "system-ui", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -76,25 +76,25 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        gray: {
-          dark: "hsl(var(--gray-dark))",
-          medium: "hsl(var(--gray-medium))",
-          light: "hsl(var(--gray-light))",
+        // Brand Colors
+        brand: {
+          red: "hsl(var(--brand-red))",
+          orange: "hsl(var(--brand-orange))",
+          dark: "hsl(var(--brand-dark))",
+          gray: "hsl(var(--brand-gray))",
+          light: "hsl(var(--brand-light))",
         },
-        // Konverta Palette
-        navy: "hsl(var(--navy))",
-        violet: "hsl(var(--violet))",
-        blue: "hsl(var(--blue))",
-        lavender: "hsl(var(--lavender))",
         // Neutral scale
         white: "hsl(var(--white))",
         "off-white": "hsl(var(--off-white))",
-        cream: "hsl(var(--cream))",
-        "warm-gray-light": "hsl(var(--warm-gray-light))",
-        "warm-gray": "hsl(var(--warm-gray))",
+        "light-gray": "hsl(var(--light-gray))",
+        "medium-gray": "hsl(var(--medium-gray))",
+        "dark-gray": "hsl(var(--dark-gray))",
         charcoal: "hsl(var(--charcoal))",
-        "dark-warm": "hsl(var(--dark-warm))",
-        slate: "hsl(var(--slate))",
+        "near-black": "hsl(var(--near-black))",
+      },
+      backgroundImage: {
+        "brand-gradient": "linear-gradient(135deg, hsl(var(--brand-red)) 0%, hsl(var(--brand-orange)) 100%)",
       },
       spacing: {
         xs: "4px",
