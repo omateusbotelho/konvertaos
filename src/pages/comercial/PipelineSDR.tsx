@@ -2,12 +2,13 @@ import { useState, useMemo, useCallback } from "react";
 import {
   DndContext,
   DragEndEvent,
+  DragOverEvent,
   DragOverlay,
   DragStartEvent,
   PointerSensor,
   useSensor,
   useSensors,
-  closestCenter,
+  rectIntersection,
 } from "@dnd-kit/core";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
@@ -212,6 +213,14 @@ export default function PipelineSDR() {
     startDrag(event.active.id as string);
   }, [startDrag]);
 
+  // Handle drag over for better UX in multi-container Kanban
+  const handleDragOver = useCallback((event: DragOverEvent) => {
+    const { over } = event;
+    // This handler helps dnd-kit track the current drop zone
+    // The actual visual feedback is handled in KanbanColumn via isOver
+    if (!over) return;
+  }, []);
+
   const handleDragEnd = useCallback((event: DragEndEvent) => {
     const { active, over } = event;
     endDrag();
@@ -219,7 +228,19 @@ export default function PipelineSDR() {
     if (!over) return;
 
     const leadId = active.id as string;
-    const targetEtapa = over.id as EtapaSDR;
+    
+    // Get the target - could be a column ID or another lead ID
+    const overId = over.id as string;
+    
+    // Determine if we dropped on a column or on a lead
+    // Column IDs are the etapa names, lead IDs are UUIDs
+    const isColumn = ETAPAS_SDR.includes(overId as EtapaSDR);
+    const targetEtapa = isColumn 
+      ? overId as EtapaSDR 
+      : (over.data?.current?.sortable?.containerId as EtapaSDR) || null;
+    
+    if (!targetEtapa) return;
+    
     const lead = leads?.find((l) => l.id === leadId);
 
     if (!lead || lead.etapa_sdr === targetEtapa) return;
@@ -503,8 +524,9 @@ export default function PipelineSDR() {
         ) : (
           <DndContext
             sensors={sensors}
-            collisionDetection={closestCenter}
+            collisionDetection={rectIntersection}
             onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
           >
             <div className="flex-1 overflow-x-auto pb-4">
