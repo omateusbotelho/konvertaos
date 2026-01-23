@@ -320,6 +320,8 @@ export default function PipelineSDR() {
       .from("leads")
       .update({
         etapa_sdr: "reuniao_agendada",
+        etapa_closer: "reuniao_agendada",
+        funil_atual: "closer",
         closer_responsavel_id: data.closer_id,
         data_agendamento: dataAgendamento.toISOString(),
       })
