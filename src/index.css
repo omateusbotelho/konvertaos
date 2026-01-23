@@ -110,7 +110,7 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Headings - Responsive with Inter optimized weights */
+  /* Headings - Responsive typography */
   h1 {
     @apply text-2xl md:text-[28px] lg:text-[32px] font-semibold tracking-tight text-white leading-tight;
   }
