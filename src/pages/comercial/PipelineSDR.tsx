@@ -316,6 +316,10 @@ export default function PipelineSDR() {
     const dataAgendamento = new Date(data.data);
     dataAgendamento.setHours(hours, minutes, 0, 0);
 
+    // Get lead info for notification
+    const lead = leads?.find(l => l.id === pendingDrop.leadId);
+    const leadNome = lead?.nome || "Lead";
+
     const { error } = await supabase
       .from("leads")
       .update({
@@ -340,11 +344,26 @@ export default function PipelineSDR() {
       realizado_por_id: profile?.id,
     });
 
+    // Send notification to the Closer
+    await supabase.from("notificacoes").insert({
+      usuario_id: data.closer_id,
+      tipo: "reuniao_agendada",
+      titulo: "Nova reunião agendada",
+      mensagem: `${profile?.nome || "SDR"} agendou uma reunião com ${leadNome} para ${format(dataAgendamento, "dd/MM 'às' HH:mm", { locale: ptBR })}`,
+      link: "/comercial/pipeline-closer",
+      dados: {
+        lead_id: pendingDrop.leadId,
+        lead_nome: leadNome,
+        data_agendamento: dataAgendamento.toISOString(),
+        sdr_nome: profile?.nome,
+      },
+    });
+
     toast.success("Reunião agendada com sucesso");
     queryClient.invalidateQueries({ queryKey: ["leads-sdr"] });
     closeAgendamentoModal();
     clearPending();
-  }, [pendingDrop, profile?.id, queryClient, closeAgendamentoModal, clearPending]);
+  }, [pendingDrop, leads, profile?.id, profile?.nome, queryClient, closeAgendamentoModal, clearPending]);
 
   const handleCancelAgendamento = useCallback(() => {
     clearPending();
