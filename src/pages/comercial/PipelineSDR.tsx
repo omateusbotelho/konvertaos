@@ -277,7 +277,9 @@ export default function PipelineSDR() {
     motivo_perda_id: string;
     observacoes?: string;
   }) => {
-    if (!pendingDrop) return;
+    // Use modal's leadId as source of truth (pendingDrop may be cleared)
+    const leadId = perdaModal.leadId;
+    if (!leadId) return;
 
     const { error } = await supabase
       .from("leads")
@@ -287,7 +289,7 @@ export default function PipelineSDR() {
         data_perda: new Date().toISOString(),
         observacoes: data.observacoes || undefined,
       })
-      .eq("id", pendingDrop.leadId);
+      .eq("id", leadId);
 
     if (error) {
       toast.error("Erro ao marcar lead como perdido");
@@ -298,7 +300,7 @@ export default function PipelineSDR() {
     queryClient.invalidateQueries({ queryKey: ["leads-sdr"] });
     closePerdaModal();
     clearPending();
-  }, [pendingDrop, queryClient, closePerdaModal, clearPending]);
+  }, [perdaModal.leadId, queryClient, closePerdaModal, clearPending]);
 
   const handleCancelPerda = useCallback(() => {
     clearPending();
@@ -310,15 +312,17 @@ export default function PipelineSDR() {
     closer_id: string;
     observacoes?: string;
   }) => {
-    if (!pendingDrop) return;
+    // Use modal's leadId as source of truth (pendingDrop may be cleared)
+    const leadId = agendamentoModal.leadId;
+    if (!leadId) return;
 
     const [hours, minutes] = data.horario.split(":").map(Number);
     const dataAgendamento = new Date(data.data);
     dataAgendamento.setHours(hours, minutes, 0, 0);
 
     // Get lead info for notification
-    const lead = leads?.find(l => l.id === pendingDrop.leadId);
-    const leadNome = lead?.nome || "Lead";
+    const lead = leads?.find(l => l.id === leadId);
+    const leadNome = lead?.nome || agendamentoModal.leadNome || "Lead";
 
     const { error } = await supabase
       .from("leads")
@@ -329,7 +333,7 @@ export default function PipelineSDR() {
         closer_responsavel_id: data.closer_id,
         data_agendamento: dataAgendamento.toISOString(),
       })
-      .eq("id", pendingDrop.leadId);
+      .eq("id", leadId);
 
     if (error) {
       toast.error("Erro ao agendar reunião");
@@ -338,7 +342,7 @@ export default function PipelineSDR() {
 
     // Create activity
     await supabase.from("atividades_lead").insert({
-      lead_id: pendingDrop.leadId,
+      lead_id: leadId,
       tipo: "reuniao",
       descricao: `Reunião agendada para ${format(dataAgendamento, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}${data.observacoes ? `. ${data.observacoes}` : ""}`,
       realizado_por_id: profile?.id,
@@ -352,7 +356,7 @@ export default function PipelineSDR() {
       mensagem: `${profile?.nome || "SDR"} agendou uma reunião com ${leadNome} para ${format(dataAgendamento, "dd/MM 'às' HH:mm", { locale: ptBR })}`,
       link: "/comercial/pipeline-closer",
       dados: {
-        lead_id: pendingDrop.leadId,
+        lead_id: leadId,
         lead_nome: leadNome,
         data_agendamento: dataAgendamento.toISOString(),
         sdr_nome: profile?.nome,
@@ -363,7 +367,7 @@ export default function PipelineSDR() {
     queryClient.invalidateQueries({ queryKey: ["leads-sdr"] });
     closeAgendamentoModal();
     clearPending();
-  }, [pendingDrop, leads, profile?.id, profile?.nome, queryClient, closeAgendamentoModal, clearPending]);
+  }, [agendamentoModal.leadId, agendamentoModal.leadNome, leads, profile?.id, profile?.nome, queryClient, closeAgendamentoModal, clearPending]);
 
   const handleCancelAgendamento = useCallback(() => {
     clearPending();
