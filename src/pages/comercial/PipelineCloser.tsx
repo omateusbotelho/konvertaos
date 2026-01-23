@@ -2,12 +2,13 @@ import { useState, useMemo, useCallback } from "react";
 import {
   DndContext,
   DragEndEvent,
+  DragOverEvent,
   DragOverlay,
   DragStartEvent,
   PointerSensor,
   useSensor,
   useSensors,
-  closestCenter,
+  rectIntersection,
 } from "@dnd-kit/core";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
@@ -203,18 +204,35 @@ export default function PipelineCloser() {
     [leads, activeId]
   );
 
-  const handleDragStart = (event: DragStartEvent) => {
+  const handleDragStart = useCallback((event: DragStartEvent) => {
     setActiveId(event.active.id as string);
-  };
+  }, []);
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  // Handle drag over for better UX in multi-container Kanban
+  const handleDragOver = useCallback((event: DragOverEvent) => {
+    const { over } = event;
+    if (!over) return;
+  }, []);
+
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
     const { active, over } = event;
     setActiveId(null);
 
     if (!over) return;
 
     const leadId = active.id as string;
-    const targetEtapa = over.id as EtapaCloser;
+    
+    // Get the target - could be a column ID or another lead ID
+    const overId = over.id as string;
+    
+    // Determine if we dropped on a column or on a lead
+    const isColumn = ETAPAS_CLOSER.includes(overId as EtapaCloser);
+    const targetEtapa = isColumn 
+      ? overId as EtapaCloser 
+      : (over.data?.current?.sortable?.containerId as EtapaCloser) || null;
+    
+    if (!targetEtapa) return;
+    
     const lead = leads?.find((l) => l.id === leadId);
 
     if (!lead || lead.etapa_closer === targetEtapa) return;
@@ -304,7 +322,7 @@ export default function PipelineCloser() {
         },
       }
     );
-  };
+  }, [leads, updateEtapa, profile?.id, profile?.nome, queryClient]);
 
   const handleConfirmReuniao = async (data: { observacoes?: string }) => {
     if (!pendingDrop) return;
@@ -755,8 +773,9 @@ export default function PipelineCloser() {
         ) : (
           <DndContext
             sensors={sensors}
-            collisionDetection={closestCenter}
+            collisionDetection={rectIntersection}
             onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
           >
             <div className="flex-1 overflow-x-auto pb-4">
